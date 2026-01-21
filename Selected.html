@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>本月精選活動｜自動套版（CropperJS 版）</title>
+
+<!-- 本機同層字型（./#勿動資料夾/字體/*.ttf） -->
+<style>
+@font-face{
+  font-family:"SN-Bold";
+  src:url("./%23勿動資料夾/字體/ShopeeNotoSans(content)-Bold.ttf") format("truetype");
+  font-weight:700;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:"SN-Medium";
+  src:url("./%23勿動資料夾/字體/ShopeeNotoSans(content)-Medium.ttf") format("truetype");
+  font-weight:500;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:"SN-Regular";
+  src:url("./%23勿動資料夾/字體/ShopeeNotoSans(content)-Regular.ttf") format("truetype");
+  font-weight:400;font-style:normal;font-display:swap;
+}
+
+  :root{
+    --page-width: 1200px;     /* 可調寬度 */
+    --row-h: 358px;           /* 每排高度預設 358 */
+    --pt: 1.333333px;         /* pt→px 換算 */
+    --title-pt: 26;           /* 標題 pt 26 */
+    --body-pt: 24;            /* 內容 pt 預設 24 */
+    --bar-h: 56px;            /* 標題條高度 */
+    --gap: 14px;              /* 左右卡片間距 */
+    --border-w: 10px;         /* 邊框 */
+    --cta-bg: #ff6b45;        /* 橘色按鈕底色 */
+    --accent: var(--cta-bg);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"SN-Medium","SN-Regular","Microsoft JhengHei",system-ui;color:#222;background:#fff6ef}
+
+  /* ---- 頂部控制列 ---- */
+  header{max-width:1200px;margin:20px auto 8px;padding:0 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  header h1{margin:0 6px 0 0;font-size:22px;font-family:"SN-Bold";letter-spacing:.04em}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{background:#222;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer;font-family:"SN-Medium";font-size:14px;font-weight:500}
+  .btn.secondary{background:#eee;color:#333}
+  .input{height:38px;border-radius:10px;border:1px solid #ddd;padding:0 12px;outline:none;font-family:"SN-Medium"}
+
+  .wrap{max-width:var(--page-width);margin:10px auto 40px;padding:0 16px;transition:max-width .2s ease}
+  .wrap.capture-pad{padding-bottom:10px;} /* 下載時加 10px 底部間距 */
+  .stage{width:100%}
+
+  /* ---- 一排（左右兩卡） ---- */
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin:0 0 14px 0}
+  .card{position:relative;height:var(--row-h);background:#fff;border:var(--border-w) solid #e5e7eb;border-radius:0;overflow:hidden;display:grid;grid-template-rows:var(--bar-h) 1fr}
+
+  /* 標題條（工具列在左、垂直置中，上移 5px） */
+  .bar{position:relative;display:flex;align-items:center;justify-content:flex-end;padding:0 16px;background:#1f3961;color:#fff}
+  .bar .toolbar{position:absolute;left:12px;top:50%;transform:translateY(calc(-50% - 5px));display:flex;gap:6px;background:rgba(255,255,255,.9);border:1px solid #e3e3e3;padding:6px;border-radius:10px;z-index:3}
+  .mini{font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-family:"SN-Medium"}
+  .hidden{display:none}
+
+  /* 標題微上移 3px，靠右 */
+  .title{margin:0;position:relative;top:-3px;font-family:"SN-Bold";font-weight:700;font-size:calc(var(--title-pt)*var(--pt));letter-spacing:.04em;text-align:right}
+
+  /* 內容區：去掉 padding，gap=0，文字顏色繼承標題色 */
+  .body{
+    position:relative;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    align-items:stretch;
+    padding:0;
+    background:#fff;
+  }
+
+  /* 圖片：在白底內容區內自動縮放置中，四邊 3px */
+  .thumb{
+    width:100%;
+    height:100%;
+    padding:3px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#fff;
+  }
+  .thumb img{
+    width:100%;
+    height:auto;          /* 讓瀏覽器依比例計算高度 */
+    max-height:100%;      /* 不超出白底區 */
+    object-fit:contain;   /* 雙保險：僅內縮，不拉伸 */
+    display:block;
+  }
+  .thumb .ph{opacity:.35;font-family:"SN-Bold";text-align:center;width:100%}
+
+  /* 文字：自身留白 */
+  .copy{
+    margin:0;
+    padding:16px;
+    white-space:pre-wrap;
+    text-align:right;
+    align-self:stretch;
+    justify-self:stretch;
+    font-family:"SN-Medium";
+    font-weight:500;
+    font-size:calc(var(--body-pt)*var(--pt));
+    line-height:1.35;
+  }
+
+  /* CTA：固定 20px 字級（不受 body-pt 影響） */
+  .cta{
+    position:absolute; right:20px; bottom:20px;
+    width:147px; height:44.8px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    border:none; border-radius:8px; background:var(--accent); color:#fff; cursor:pointer;
+    font-weight:500; font-size:20px; line-height:1;
+  }
+  .cta::before{content:none}
+  .cta svg{width:18px;height:18px;display:block;flex:0 0 18px}
+
+  /* ✨ CTA 文字禁止換行 */
+  .cta span{ white-space:nowrap; }
+
+  /* 色票（在工具列中） */
+  .palette-trigger{width:26px;height:26px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer;background:conic-gradient(#f94144,#f3722c,#f9c74f,#90be6d,#43aa8b,#577590,#4D96FF,#f94144)}
+  .palette{position:absolute;left:0;top:calc(100% + 6px);z-index:4;background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:10px;display:none;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+  .palette.open{display:grid;grid-template-columns:repeat(6,24px);gap:8px;max-width:280px}
+  .sw{width:24px;height:24px;border-radius:6px;border:1px solid rgba(0,0,0,.1);cursor:pointer}
+  .palette .full{grid-column:1/-1;display:flex;gap:8px;margin-top:6px}
+  .palette input{flex:1;height:28px;border:1px solid #ddd;border-radius:8px;padding:0 8px;font-family:"SN-Medium"}
+
+  /* Toast */
+  .toast{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+  .toast .msg{background:#111;color:#fff;padding:10px 12px;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.15);font-size:14px;display:flex;align-items:center;gap:8px;opacity:.98;font-family:"SN-Medium"}
+  .msg.ok{background:#13a10e}.msg.err{background:#c72c41}.msg.load{background:#333}
+  .msg .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  /* 下載時隱藏 UI */
+  body.capturing header,body.capturing .toolbar,body.capturing .palette,body.capturing .palette-trigger{display:none!important}
+
+  @media (max-width:900px){.row{grid-template-columns:1fr}.body{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+</head>
+<body>
+  <header>
+    <h1>本月精選活動</h1>
+    <div class="controls">
+    
+      <label class="btn secondary" style="display:flex;align-items:center;gap:6px">寬度
+      <input id="widthPx" class="input" type="number" min="800" step="10" value="1200" style="width:90px"></label>
+      <label class="btn secondary" style="display:flex;align-items:center;gap:6px">每排高度<input id="rowH" class="input" type="number" min="260" step="1" value="358" style="width:90px"></label>
+      <label class="btn secondary" style="display:flex;align-items:center;gap:6px">標題字級<input id="titlePt" class="input" type="number" step="1" value="26" style="width:90px"></label>
+      <label class="btn secondary" style="display:flex;align-items:center;gap:6px">
+        內容字級
+        <input id="bodyPt" class="input" type="number" step="1" value="24" style="width:110px">
+      </label>
+		  <button id="autoLoad" class="btn">上傳工單</button>
+      <label class="btn secondary" style="display:none">選擇「圖片資料夾」<input id="pickFolder" type="file" webkitdirectory directory multiple accept="image/*" style="display:none"></label>
+      <label class="btn secondary" style="display:none">載入工單（.xlsx/.csv）<input id="pickSheet" type="file" accept=".xlsx,.xls,.csv" style="display:none"></label>
+      <button id="toggleEdit" class="btn" style="display:none">編輯模式：開</button>
+      <button id="addRow" class="btn secondary" style="display:none">＋ 新增一排</button>
+      <button id="downloadJPG" class="btn">下載 JPG</button>
+      <!-- ✨ 新增：下載到資料夾（優先使用 showSaveFilePicker） -->
+      <button id="downloadToFolder" class="btn" style="display:none">下載到資料夾</button>
+      <button id="saveDraft" class="btn secondary">下載編輯檔</button>
+      <label class="btn secondary">讀取編輯檔<input id="loadDraft" type="file" accept=".json" style="display:none"></label>
+      <button id="clearAll" class="btn secondary" style="display:none">清除內容</button>
+    </div>
+  </header>
+
+  <!-- CropperJS 彈窗 -->
+  <div id="cropModal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9998">
+    <div style="width:min(90vw,900px);background:#fff;border-radius:12px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px"><strong style="font-family:'SN-Bold'">圖片裁切</strong><button id="cropClose" class="btn secondary">關閉</button></div>
+      <div style="padding:10px"><img id="cropImg" alt="裁切" style="max-width:100%;max-height:65vh;display:block;margin:0 auto"></div>
+      <div style="display:flex;gap:8px;padding:10px;justify-content:flex-end"><button id="cropApply" class="btn">套用</button></div>
+    </div>
+  </div>
+
+  <div class="wrap" id="wrap"><div id="stage" class="stage"></div></div>
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+  <script>
+    const PAGE_NAME='本月精選活動';
+    const PAGE_NAME_NORM=PAGE_NAME.replace(/\s+/g,'').toLowerCase();
+    const stage=document.getElementById('stage'), wrap=document.getElementById('wrap');
+    const toast=document.getElementById('toast');
+    let editMode=true; const state={images:[]};
+
+    /* Toast */
+    function showToast(text,type='ok',ms=1800){
+      const el=document.createElement('div');
+      el.className=`msg ${type}`;
+      el.innerHTML=type==='load'?`<span class="spin"></span>${text}`:text;
+      toast.appendChild(el);
+      if(type!=='load'){setTimeout(()=>el.remove(),ms)}
+      return el;
+    }
+
+    /* 圖片狀態 → 更新「換圖/新增圖片」文案（關鍵新增） */
+    function updateImgBtn(card){
+      const has = !!card.querySelector('img')?.getAttribute('src');
+      const btn = card.querySelector('.toolbar .img');
+      if(btn) btn.textContent = has ? '換圖' : '新增圖片';
+    }
+
+    /* 變數套用 */
+    const widthPx=document.getElementById('widthPx');
+    const rowH=document.getElementById('rowH');
+    const titlePt=document.getElementById('titlePt');
+    const bodyPt=document.getElementById('bodyPt');
+    function setVars(){
+      document.documentElement.style.setProperty('--page-width', Math.max(800,+widthPx.value||1200)+'px');
+      document.documentElement.style.setProperty('--row-h', Math.max(260,+rowH.value||358)+'px');
+      document.documentElement.style.setProperty('--title-pt', +titlePt.value||26);
+      document.documentElement.style.setProperty('--body-pt', +bodyPt.value||24);
+      wrap.style.maxWidth = getComputedStyle(document.documentElement).getPropertyValue('--page-width');
+    }
+    [widthPx,rowH,titlePt,bodyPt].forEach(i=> i.addEventListener('input', setVars));
+    setVars();
+
+    /* 色票 */
+    const SWATCHES=["#1f3961","#2e84b6","#6a402f","#b4877e","#ffa85b","#ee4d2d","#133067","#4D96FF","#43AA8B","#90BE6D","#F94144","#FFB703"];
+    function attachPalette(card){
+      const bar=card.querySelector('.bar');
+      const toolbar=bar.querySelector('.toolbar');
+      const palBtn=toolbar.querySelector('.palette-trigger');
+      const pal=document.createElement('div'); pal.className='palette'; toolbar.appendChild(pal);
+      pal.innerHTML=`${SWATCHES.map(c=>`<div class='sw' data-c='${c}' style='background:${c}'></div>`).join('')}<div class='full'><input class='hex' placeholder='#RRGGBB'><button class='mini apply'>套用</button></div>`;
+      palBtn.addEventListener('click',e=>{e.stopPropagation();document.querySelectorAll('.palette.open').forEach(p=>p.classList.remove('open'));pal.classList.add('open')});
+      pal.addEventListener('click',e=>{const c=e.target.getAttribute('data-c'); if(!c) return; applyTheme(card,c); pal.classList.remove('open')});
+      pal.querySelector('.apply').addEventListener('click',()=>{const v=pal.querySelector('.hex').value.trim(); if(!/^#([0-9a-fA-F]{6})$/.test(v)) return alert('色碼格式錯誤'); applyTheme(card,v); pal.classList.remove('open')});
+      document.addEventListener('click',e=>{ if(!pal.contains(e.target)&&!palBtn.contains(e.target)) pal.classList.remove('open')});
+    }
+    function applyTheme(card,headerHex){
+      card.querySelector('.bar').style.background=headerHex;
+      card.style.borderColor=headerHex;
+      card.querySelector('.body').style.color=headerHex;
+      card.dataset.header=headerHex;
+    }
+
+    /* ===== CTA 字數與換行鎖定 ===== */
+    const CTA_MAX = 4;
+
+    // 以 code point 計數，避免中英文/emoji 被切壞；並去掉空白/換行
+    function clampCTA(str){
+      return Array.from((str||'').replace(/\s+/g,'')).slice(0, CTA_MAX).join('');
+    }
+
+    function enforceCTALimit(span){
+      if(!span || span.dataset.ctaEnforced) return;
+      span.dataset.ctaEnforced = '1';
+
+      // 首次套用
+      span.textContent = clampCTA(span.textContent);
+
+      // 禁止 Enter 造成換行
+      span.addEventListener('keydown', e=>{
+        if(e.key === 'Enter') e.preventDefault();
+      });
+
+      // 貼上：只留前 4 個字、去掉空白
+      span.addEventListener('paste', e=>{
+        e.preventDefault();
+        const t = clampCTA(e.clipboardData.getData('text') || '');
+        document.execCommand('insertText', false, t);
+      });
+
+      // 一般輸入：超過就截斷
+      span.addEventListener('input', ()=>{
+        const fixed = clampCTA(span.textContent);
+        if(span.textContent !== fixed) span.textContent = fixed;
+      });
+    }
+
+    /* CropperJS */
+    const cropModal=document.getElementById('cropModal');
+    const cropImg=document.getElementById('cropImg');
+    const cropClose=document.getElementById('cropClose');
+    const cropApply=document.getElementById('cropApply');
+    let cropper=null, cropTarget=null;
+    function openCropper(targetImg){
+      cropTarget=targetImg;
+      cropImg.src=targetImg.src||'';
+      cropModal.style.display='flex';
+      cropper?.destroy?.();
+      cropper=new Cropper(cropImg,{viewMode:1,autoCropArea:1,movable:true,zoomable:true,scalable:true});
+    }
+    cropApply.addEventListener('click',()=>{
+      if(!cropper||!cropTarget) return;
+      const canvas=cropper.getCroppedCanvas();
+      const dataUrl=canvas.toDataURL('image/png');
+
+      // 設定圖片為裁切結果
+      cropTarget.src=dataUrl;
+
+      // 記住裁切後的寬高並鎖定顯示比例（避免任何拉伸）
+      cropTarget.dataset.cw=String(canvas.width);
+      cropTarget.dataset.ch=String(canvas.height);
+      cropTarget.style.aspectRatio = `${canvas.width} / ${canvas.height}`;
+
+      cropModal.style.display='none';
+      cropper.destroy();
+      showToast('裁切完成','ok');
+    });
+    cropClose.addEventListener('click',()=>{
+      cropper?.destroy?.();
+      cropModal.style.display='none';
+    });
+
+    /* 建卡（圖左、文右）— 已加上按鈕文案自動切換 */
+    function createCard(d = {}) {
+      const card = document.createElement('article'); 
+      card.className = 'card'; 
+      const headerHex = d.titleBg || '#1f3961';
+
+      card.innerHTML = `
+        <div class="bar">
+          <div class="toolbar ${editMode ? '' : 'hidden'}">
+            <button class="mini img">換圖</button>
+            <button class="mini edit">編輯</button>
+            <button class="palette-trigger" title="換色"></button>
+          </div>
+          <h3 class="title" contenteditable="${editMode}">${d.title || '標題文字'}</h3>
+        </div>
+        <div class="body">
+          <div class="thumb"><img alt=""><div class="ph">無圖片</div></div>
+          <p class="copy" contenteditable="${editMode}">${d.copy || '內容文字'}</p>
+          <button class="cta"><span contenteditable="${editMode}">${clampCTA(d.btn || '開始分享')}</span>
+            <svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="30,20 80,50 30,80" fill="#fff"/></svg>
+          </button>
+        </div>
+        <input type="file" accept="image/*" class="hidden picker">
+      `;
+
+      applyTheme(card, headerHex);
+      attachPalette(card);
+
+      // ✨ 套用 CTA 鎖定
+      enforceCTALimit(card.querySelector('.cta span'));
+
+      // 初始時依圖片有無 → 設定「新增圖片 / 換圖」
+      updateImgBtn(card);
+
+      // 換圖（或新增圖片）
+      card.querySelector('.img').addEventListener('click', () => card.querySelector('.picker').click());
+      card.querySelector('.picker').addEventListener('change', e => {
+        const f = e.target.files?.[0]; 
+        if (!f) return;
+        const url = URL.createObjectURL(f);
+        const img = card.querySelector('img');
+        const ph = card.querySelector('.ph');
+        img.src = url;
+        // 清掉先前裁切比（回復依內建比例自動算）
+        img.style.aspectRatio = '';
+        delete img.dataset.cw; 
+        delete img.dataset.ch;
+        ph.style.display = 'none';
+        updateImgBtn(card);   // 換圖後文案改為「換圖」
+      });
+
+      // 編輯（裁切）
+      card.querySelector('.edit').addEventListener('click', () => {
+        const img = card.querySelector('img');
+        if (!img || !img.getAttribute('src')) {   // 用 getAttribute 確保真實空值
+          return alert('此卡沒有圖片');
+        }
+        openCropper(img);
+      });
+
+      return card;
+    }
+
+    function createRow(d){
+      const row=document.createElement('section');row.className='row';
+      const left=createCard(d?.left||{}), right=createCard(d?.right||{});
+      row.append(left,right);return row;
+    }
+
+    /* 預設排 */
+    function initDefault(){
+      stage.innerHTML='';
+      stage.appendChild(createRow({
+        left : { titleBg:'#1f3961', title:'蝦皮中秋節', copy:'9/15–9/17\n天天瘋搶5折券', btn:'開始分享' },
+        right: { titleBg:'#2e84b6', title:'適樂膚',     copy:'整點搶\n1折券',        btn:'開始分享' }
+      }));
+      setEditModeUI();
+      applyImagesByIndex(); // 確保按鈕文案同步
+    }
+    initDefault();
+
+    /* 編輯模式 */
+    function setEditModeUI(){
+      document.querySelectorAll('.toolbar').forEach(t=> t.classList.toggle('hidden', !editMode));
+      document.querySelectorAll('.title,.copy,.cta span').forEach(el=>{
+        if(editMode) el.setAttribute('contenteditable','true'); else el.removeAttribute('contenteditable');
+      });
+      // ✨ 切換編輯模式後，保險再套 CTA 限制
+      document.querySelectorAll('.cta span').forEach(enforceCTALimit);
+    }
+    document.getElementById('toggleEdit').addEventListener('click',()=>{
+      editMode=!editMode; setEditModeUI();
+      document.getElementById('toggleEdit').textContent=`編輯模式：${editMode?'開':'關'}`;
+    });
+
+    /* 圖片（資料夾） */
+    document.getElementById('pickFolder').addEventListener('change', e=>{
+      const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
+      files.sort((a,b)=>a.name.localeCompare(b.name,'zh-Hant',{numeric:true}));
+      state.images=files.map((f,i)=>({name:f.name,url:URL.createObjectURL(f),idx:i+1}));
+      applyImagesByIndex();
+      showToast(`已載入圖片（${state.images.length} 張）`,'ok');
+    });
+    function applyImagesByIndex(){
+      document.querySelectorAll('.card').forEach(card=>{
+        const idx=+card.dataset.imgIndex||0;
+        const it=state.images.find(x=>x.idx===idx);
+        const img=card.querySelector('img'); const ph=card.querySelector('.ph');
+        if(img && img.src && img.src.startsWith('data:')){
+          // 這張卡已經有內嵌圖片（例如從暫存檔載入），不要被資料夾圖片覆蓋
+          if(ph) ph.style.display='none';
+          updateImgBtn(card);
+          return;
+        }
+        if(it){
+          img.src=it.url; if(ph) ph.style.display='none';
+          img.style.aspectRatio='';
+          delete img.dataset.cw; delete img.dataset.ch;
+        }else{
+          if(img) img.removeAttribute('src');
+          if(ph) ph.style.display='block';
+        }
+        updateImgBtn(card); // 同步「新增圖片／換圖」
+      });
+    }
+
+    /* ===== 下載區 ===== */
+    // 共用：截圖並回傳 Blob（給 showSaveFilePicker 用）
+    async function captureAsBlob(mime='image/jpeg', quality=0.95){
+      if(document.activeElement) document.activeElement.blur();
+      wrap.classList.add('capture-pad');         // 暫時加底部 10px
+      document.body.classList.add('capturing');
+      await new Promise(r=>requestAnimationFrame(r));
+      const canvas=await html2canvas(wrap,{useCORS:true,backgroundColor:'#fff',scale:1});
+      document.body.classList.remove('capturing');
+      wrap.classList.remove('capture-pad');      // 還原
+      // 部分環境 canvas.toBlob 可能回 null，補一個 dataURL 回退
+      const blob = await new Promise(resolve=>{
+        try{ canvas.toBlob(b=>resolve(b), mime, quality); }catch{ resolve(null); }
+      });
+      if(blob) return blob;
+      const dataURL = canvas.toDataURL(mime, quality);
+      const byteString = atob(dataURL.split(',')[1]);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i=0;i<byteString.length;i++) ia[i] = byteString.charCodeAt(i);
+      return new Blob([ab], {type:mime});
+    }
+
+    // 既有：直接觸發瀏覽器下載
+    async function captureAndDownload(mime,filename){
+      if(document.activeElement) document.activeElement.blur();
+      wrap.classList.add('capture-pad');         // 暫時加底部 10px
+      document.body.classList.add('capturing');
+      await new Promise(r=>requestAnimationFrame(r));
+      const canvas=await html2canvas(wrap,{useCORS:true,backgroundColor:'#fff',scale:1});
+      document.body.classList.remove('capturing');
+      wrap.classList.remove('capture-pad');      // 還原
+      const a=document.createElement('a'); a.download=filename; a.href=canvas.toDataURL(mime,0.95); a.click();
+      showToast('已下載完成','ok');
+    }
+
+    document.getElementById('downloadJPG').addEventListener('click',()=>captureAndDownload('image/jpeg','本月精選活動.jpg'));
+
+    // ✨ 新增：使用 showSaveFilePicker 儲存到自選資料夾；不支援就回退成預設下載
+    document.getElementById('downloadToFolder').addEventListener('click', async () => {
+      const mime='image/jpeg';
+      const suggestedName = `${PAGE_NAME}.jpg`;
+      try{
+        if(!('showSaveFilePicker' in window)) throw new Error('NO_FSP');
+        const handle = await window.showSaveFilePicker({
+          suggestedName,
+          types: [
+            { description: 'JPEG Image', accept: { 'image/jpeg': ['.jpg', '.jpeg'] } },
+            { description: 'PNG Image',  accept: { 'image/png' : ['.png'] } }
+          ]
+        });
+        // 目前固定輸出 JPG；若要支援 PNG，可依副檔名切換 mime
+        const blob = await captureAsBlob(mime, 0.95);
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        showToast('已儲存到指定位置','ok');
+      }catch(e){
+        if(e?.name==='AbortError'){
+          return showToast('已取消儲存','load',1600);
+        }
+        // 不支援或出錯 → 回退成預設下載到「下載」資料夾
+        await captureAndDownload(mime, suggestedName);
+      }
+    });
+
+    /* 新增一排（已可用；新卡預設顯示「新增圖片」） */
+    document.getElementById('addRow').addEventListener('click',()=>{ 
+      stage.appendChild(createRow({})); 
+      setEditModeUI(); 
+      applyImagesByIndex(); // 保險：若有索引對應立即套入並刷新文案
+    });
+
+    /* 圖片轉成 dataURL（用於暫存） */
+    function getImgDataUrl(img){
+      return new Promise((resolve)=>{
+        try{
+          if(!img) return resolve(null);
+          const src = img.getAttribute('src') || '';
+          if(!src) return resolve(null);
+          // 已經是 dataURL 直接回傳
+          if(src.startsWith('data:')) return resolve(src);
+          const canvas = document.createElement('canvas');
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+          if(!w || !h) return resolve(null);
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          try{
+            const dataUrl = canvas.toDataURL('image/png');
+            resolve(dataUrl);
+          }catch(e){
+            resolve(null);
+          }
+        }catch(e){
+          resolve(null);
+        }
+      });
+    }
+
+    /* 暫存 / 載入暫存 */
+    async function captureDraft(){
+      const rowEls=[...stage.querySelectorAll('.row')];
+      const rows=[];
+      for(const row of rowEls){
+        const cards=row.querySelectorAll('.card');
+        const buildCard=async (c)=>{
+          if(!c) return null;
+          const title=c.querySelector('.title')?.textContent||'';
+          const copy=c.querySelector('.copy')?.textContent||'';
+          const btn=c.querySelector('.cta span')?.textContent||'';
+          const imgIndex=+(c.dataset.imgIndex||0);
+          const titleBg=c.dataset.header||'#1f3961';
+          const imgEl=c.querySelector('img');
+          const imgData=imgEl ? await getImgDataUrl(imgEl) : null;
+          return { titleBg, title, copy, btn, imgIndex, imgData };
+        };
+        const left = cards[0] ? await buildCard(cards[0]) : null;
+        const right= cards[1] ? await buildCard(cards[1]) : null;
+        rows.push({left,right});
+      }
+      return {
+        tab:PAGE_NAME,
+        meta:{
+          width:+widthPx.value||1200,
+          rowH:+rowH.value||358,
+          titlePt:+titlePt.value||26,
+          bodyPt:+bodyPt.value||24
+        },
+        rows
+      };
+    }
+    document.getElementById('saveDraft').addEventListener('click',async ()=>{
+      const draft = await captureDraft();
+      const blob=new Blob([JSON.stringify(draft,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.download='edm_draft_本月精選活動.json'; a.href=URL.createObjectURL(blob); a.click();
+      showToast('已下載暫存檔','ok');
+    });
+    document.getElementById('loadDraft').addEventListener('change',e=>{
+      const f=e.target.files?.[0]; if(!f) return;
+      const r=new FileReader();
+      r.onload=()=>{
+        try{
+          const data=JSON.parse(r.result);
+          if(data.tab&&data.tab!==PAGE_NAME) return showToast('暫存檔頁名不符','err');
+          widthPx.value=data.meta?.width??1200; rowH.value=data.meta?.rowH??358; titlePt.value=data.meta?.titlePt??26; bodyPt.value=data.meta?.bodyPt??24; setVars();
+          stage.innerHTML='';
+          (data.rows||[]).forEach(d=>stage.appendChild(createRow(d)));
+          stage.querySelectorAll('.row').forEach((rowEl,ri)=>{
+            rowEl.querySelectorAll('.card').forEach((card,ci)=>{
+              const d=(ci===0?data.rows[ri].left:data.rows[ri].right)||{};
+              card.dataset.imgIndex=d.imgIndex||0;
+              applyTheme(card,d.titleBg||'#1f3961');
+              // 還原圖片：若暫存檔有內嵌 imgData，優先使用
+              const imgEl = card.querySelector('img');
+              const phEl  = card.querySelector('.ph');
+              if(d.imgData){
+                if(imgEl){
+                  imgEl.src = d.imgData;
+                  imgEl.style.aspectRatio='';
+                  delete imgEl.dataset.cw;
+                  delete imgEl.dataset.ch;
+                }
+                if(phEl) phEl.style.display='none';
+              }
+              // ✨ 保險：載入後也確保 CTA 限制存在
+              enforceCTALimit(card.querySelector('.cta span'));
+            });
+          });
+          applyImagesByIndex(); setEditModeUI();
+          showToast('暫存已載入','ok');
+        }catch{ showToast('暫存檔格式錯誤','err'); }
+      };
+      r.readAsText(f,'utf-8');
+    });
+
+    /* 自動載入（同層） */
+    document.getElementById('autoLoad').addEventListener('click', autoLoad);
+    async function autoLoad(){
+      if(!('showDirectoryPicker' in window)) return showToast('瀏覽器不支援同層自動讀取','err');
+      try{
+        const root=await window.showDirectoryPicker();
+
+        // 先找同名圖片資料夾
+        let imgFolder=null;
+        for await (const [name,handle] of root.entries()){
+          if(handle.kind==='directory' && name.replace(/\s+/g,'').toLowerCase()===PAGE_NAME_NORM){ imgFolder=handle; break; }
+        }
+        if(imgFolder){
+          const imgs=[]; for await (const [n,h] of imgFolder.entries()){
+            if(h.kind==='file'){ const f=await h.getFile(); if(f.type.startsWith('image/')) imgs.push(f); }
+          }
+          imgs.sort((a,b)=>a.name.localeCompare(b.name,'zh-Hant',{numeric:true}));
+          state.images=imgs.map((f,i)=>({name:f.name,url:URL.createObjectURL(f),idx:i+1}));
+          showToast(`已載入圖片（${state.images.length} 張）`,'ok');
+        }else{
+          showToast(`找不到同名資料夾「${PAGE_NAME}」`,'load',1600);
+        }
+
+        // 再找工單
+        const cand=[]; for await (const [name,handle] of root.entries()){
+          if(handle.kind==='file' && /\.(xlsx|xls|csv)$/i.test(name)) cand.push({name,handle});
+        }
+        if(!cand.length){ applyImagesByIndex(); return showToast('未找到工單（.xlsx/.csv）','load',1600); }
+        cand.sort((a,b)=>{
+          const aHit=a.name.replace(/\s+/g,'').toLowerCase().includes(PAGE_NAME_NORM)?0:1;
+          const bHit=b.name.replace(/\s+/g,'').toLowerCase().includes(PAGE_NAME_NORM)?0:1;
+          return aHit-bHit || a.name.localeCompare(b.name,'zh-Hant');
+        });
+        const f=await cand[0].handle.getFile();
+        const buf=await f.arrayBuffer();
+        const wb=XLSX.read(buf,{type:'array'});
+        useSheet(wb);
+        showToast('自動載入完成','ok');
+      }catch(e){
+        if(e?.name!=='AbortError') showToast('自動載入失敗','err');
+      }
+    }
+
+    /* 解析工單 — 每排 +6 列；左=A 欄、右=B 欄；只收有字的卡 */
+    function parseColorCell(s){
+      const m=(s||'').toString().trim();
+      const c1=(m.match(/#([0-9a-fA-F]{6})/g)||[])[0] || '#1f3961';
+      return {header:c1};
+    }
+    function useSheet(wb){
+      const exact=wb.SheetNames.find(n=>n.trim()===PAGE_NAME);
+      const loose=wb.SheetNames.find(n=>n.trim().replace(/\s+/g,'').toLowerCase()===PAGE_NAME_NORM);
+      const sheet=exact||loose||wb.SheetNames[0];
+      const ws=wb.Sheets[sheet];
+      const A=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+
+      const rows=[];
+      for(let base=0;base<A.length;base+=6){
+        const Lc=parseColorCell(A[base]?.[0]);
+        const Lt=(A[base+1]?.[0]||'').toString().trim();
+        const Lb=(A[base+2]?.[0]||'').toString().trim();
+        const Lbtn=(A[base+3]?.[0]||'').toString().replace(/[▶►▷▶️]/g,'').trim();
+        const Lidx=parseInt((A[base+4]?.[0]||'0').toString().replace(/\D+/g,''),10)||0;
+
+        const Rc=parseColorCell(A[base]?.[1]);
+        const Rt=(A[base+1]?.[1]||'').toString().trim();
+        const Rb=(A[base+2]?.[1]||'').toString().trim();
+        const Rbtn=(A[base+3]?.[1]||'').toString().replace(/[▶►▷▶️]/g,'').trim();
+        const Ridx=parseInt((A[base+4]?.[1]||'0').toString().replace(/\D+/g,''),10)||0;
+
+        const leftHas = Lt || Lb || Lbtn;
+        const rightHas= Rt || Rb || Rbtn;
+        if(!leftHas && !rightHas) continue;
+
+        rows.push({
+          left : leftHas  ? { titleBg:Lc.header, title:Lt, copy:Lb, btn:Lbtn, imgIndex:Lidx } : null,
+          right: rightHas ? { titleBg:Rc.header, title:Rt, copy:Rb, btn:Rbtn, imgIndex:Ridx } : null
+        });
+      }
+      if(!rows.length){ showToast('工單沒有可用資料','err'); return; }
+
+      stage.innerHTML='';
+      rows.forEach(r=>{
+        const row=createRow({ left:r.left||{}, right:r.right||{} });
+        row.querySelectorAll('.card').forEach((card,i)=>{
+          const d = i===0 ? (r.left||{}) : (r.right||{});
+          if(d.titleBg) applyTheme(card,d.titleBg);
+          if(d.imgIndex) card.dataset.imgIndex = d.imgIndex;
+          if(d.title!=null) card.querySelector('.title').textContent = d.title;
+          if(d.copy!=null)  card.querySelector('.copy').textContent  = d.copy;
+          if(d.btn!=null)   card.querySelector('.cta span').textContent = clampCTA(d.btn); // ✨ 套 clamp
+          // ✨ 確保 CTA 限制存在
+          enforceCTALimit(card.querySelector('.cta span'));
+        });
+        stage.appendChild(row);
+      });
+      applyImagesByIndex(); setEditModeUI();
+      showToast(`已載入工單（頁籤：${sheet}）`,'ok');
+    }
+
+    /* 清除內容（回預設） */
+    document.getElementById('clearAll').addEventListener('click',()=>{
+      if(!confirm('確定要清除內容嗎？')) return;
+      document.getElementById('widthPx').value=1200;
+      document.getElementById('rowH').value=358;
+      document.getElementById('titlePt').value=26;
+      document.getElementById('bodyPt').value=24;
+      setVars();
+      initDefault();
+      showToast('內容已清除','ok');
+    });
+  </script>
+</body>
+</html>
