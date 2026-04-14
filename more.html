@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>更多精選商品v1</title>
+<title>更多精選商品｜自動套版</title>
 
 <!-- 已移除 Google Noto Sans TC 相關 link -->
 
@@ -13,72 +13,100 @@
   /* 本機同層字型：./#勿動資料夾/字體/ShopeeNotoSans(content)-*.ttf */
   @font-face{
     font-family:"SN-Bold";
-    src:url("./fonts/ShopeeNotoSans(content)-Bold.ttf") format("truetype");
+    src:url("./%23勿動資料夾/字體/ShopeeNotoSans(content)-Bold.ttf") format("truetype");
     font-weight:700;font-style:normal;font-display:swap;
   }
   @font-face{
     font-family:"SN-Medium";
-    src:url("./fonts/ShopeeNotoSans(content)-Medium.ttf") format("truetype");
+    src:url("./%23勿動資料夾/字體/ShopeeNotoSans(content)-Medium.ttf") format("truetype");
     font-weight:500;font-style:normal;font-display:swap;
   }
   @font-face{
     font-family:"SN-Regular";
-    src:url("./fonts/ShopeeNotoSans(content)-Regular.ttf") format("truetype");
+    src:url("./%23勿動資料夾/字體/ShopeeNotoSans(content)-Regular.ttf") format("truetype");
     font-weight:400;font-style:normal;font-display:swap;
   }
 
   :root{
-    --bg:#ffbd83; --accent:#ff6b45; --text:#2b1908; --highlight:#e3342f;
-    --border:#ffbd83; --gap:9px; --img-height:280px;
+    --bg:#ffbd83;
+    --accent:#ff6b45;
+    --text:#2b1908;
+    --highlight:#e3342f;
+    --page-width:1000px;
+    --page-bg:#f8e8d9;
+    --section-width:846px;
+    --card-width:377px;
+    --card-height:244px;
+    --side-gap:17px;
+    --card-gap-x:17px;
+    --card-gap-y:17px;
+    --section-pad-y:17px;
+    --meta-gap-top:17px;
+    --meta-gap-bottom:0px;
+    --font-size-main:30px;
+    --ig-scale:0.705;
+    --ig-title-top-gap:69px;
+    --ig-title-bottom-gap:32px;
+    --ig-footer-gap-top:15px;
+    --ig-footer-gap-bottom:30px;
   }
   *{box-sizing:border-box}
   body{
     margin:0;
     /* 強制只吃同層 SN 字型，最後留 generic sans-serif 避免整頁沒字 */
-    font-family:"SN-Regular","SN-Medium","SN-Bold",sans-serif;
+    font-family:"SN-Regular","SN-Medium","SN-Bold", Arial, sans-serif;
     color:var(--text);
     background:#fff6ef;
   }
   header{max-width:1200px;margin:24px auto 8px;padding:0 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
   header h1{margin:0 6px 0 0;font-size:24px;font-weight:900;letter-spacing:.04em;}
   .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.controls .btn{margin-top:8px;}
   .btn{background:#222;color:#fff;border:none;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700;font-size:12pt;}
   .btn.secondary{background:#eee;color:#333}
   .input{height:38px;border-radius:10px;border:1px solid #ddd;padding:0 12px;outline:none;}
-  .wrap{max-width:1200px;margin:10px auto 40px;padding:0 16px;transition:max-width .2s ease;}
+  .wrap{max-width:var(--page-width);margin:10px auto 40px;padding:0;transition:max-width .2s ease;}
   .wrap.capture-pad{padding-bottom:10px;}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap);}
-  @media (max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}}
-  @media (max-width:580px){.grid{grid-template-columns:1fr;}}
-  .card{background:#fff;border:7px solid var(--border);overflow:hidden;position:relative;}
-  .thumb{position:relative;padding:14px;min-height:calc(var(--img-height) + 60px);display:flex;align-items:center;justify-content:center;background:#fff;}
-  .thumb img{max-width:100%;max-height:var(--img-height);object-fit:contain;display:block;}
+  .grid{display:flex;flex-direction:column;gap:24px;align-items:center;}
+  .ig-page{width:var(--page-width);background:var(--page-bg);display:flex;flex-direction:column;align-items:center;overflow:hidden;}
+  .ig-title-wrap{width:100%;padding-top:var(--ig-title-top-gap);display:flex;justify-content:center;}
+  .ig-title{margin:0;max-width:calc(var(--page-width) - 80px);padding:10px 50px 12px;border-radius:999px;background:#ee4d2d;color:#fff;font-family:"SN-Bold","SN-Medium","SN-Regular",sans-serif;font-size:48px;font-weight:700;line-height:1.15;text-align:center;white-space:nowrap;}
+  .section-block{width:var(--section-width);background:var(--section-bg, #fff);padding:calc(var(--section-pad-y) * var(--ig-scale)) calc(var(--side-gap) * var(--ig-scale));margin-top:var(--ig-title-bottom-gap);}
+  .section-grid{display:grid;grid-template-columns:repeat(3,calc(var(--card-width) * var(--ig-scale)));column-gap:calc(var(--card-gap-x) * var(--ig-scale));row-gap:calc(var(--card-gap-y) * var(--ig-scale));}
+  .card{width:calc(var(--card-width) * var(--ig-scale));background:transparent;border:none;overflow:visible;position:relative;padding:0;}
+  .thumb{position:relative;width:calc(var(--card-width) * var(--ig-scale));height:calc(var(--card-height) * var(--ig-scale));min-height:calc(var(--card-height) * var(--ig-scale));padding:0;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;}
+  .thumb .img-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .thumb .img-transform{position:absolute;left:50%;top:50%;height:100%;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%) scale(1);transform-origin:center center;will-change:transform;}
+  .thumb img{max-width:none;max-height:none;width:auto;height:100%;object-fit:contain;display:block;margin:0;pointer-events:none;user-select:none;-webkit-user-drag:none;}
   .thumb img:not([src]){display:none;}
   .thumb .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#bbb;font-size:18px;user-select:none;pointer-events:none;}
-  .play{position:absolute;right:16px;bottom:-22px;width:44px;height:44px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#fff;box-shadow:0 4px 10px rgba(255,107,69,.35);}
-  .meta{background:var(--bg);text-align:center;padding:20px 0;}
+  .play{display:none!important;}
+  .meta{background:transparent;text-align:center;padding:calc(var(--meta-gap-top) * var(--ig-scale)) 0 calc(var(--meta-gap-bottom) * var(--ig-scale));display:flex;justify-content:center;align-items:center;}
+  .meta-line{display:inline-flex;justify-content:center;align-items:center;gap:1ch;line-height:1.2;white-space:nowrap;}
 
   .brand{
-    /* 僅指定 SN 字體，不再列出 Noto / 微軟正黑 / 系統字 */
-    font-family:"SN-Bold","SN-Medium","SN-Regular",sans-serif;
-    font-size:24px;
-    font-weight:700;
-    letter-spacing:.06em;
-    margin:0 0 0px; /* 品名-文案距離 0px */
+    font-family:"SN-Medium","SN-Regular","SN-Bold",sans-serif;
+    font-size:calc(var(--font-size-main) * var(--ig-scale));
+    font-weight:500;
+    letter-spacing:0;
+    margin:0;
+    color:var(--text);
   }
 
   .share{
-    /* 僅指定 SN 字體 */
-    font-family:"SN-Medium","SN-Regular","SN-Bold",sans-serif;
+    font-family:"SN-Bold","SN-Medium","SN-Regular",sans-serif;
     margin:0;
-    font-size:24px;
-    font-weight:500;
+    font-size:calc(var(--font-size-main) * var(--ig-scale));
+    font-weight:700;
     color:var(--highlight);
-    letter-spacing:.06em;
-    white-space:pre-wrap;
+    letter-spacing:0;
+    white-space:nowrap;
   }
 
-  .toolbar{position:absolute;left:10px;top:10px;display:flex;gap:6px;background:rgba(255,255,255,.85);padding:6px;border-radius:10px;border:1px solid #e5e5e5;}
+  .ig-footer{width:100%;margin-top:var(--ig-footer-gap-top);padding-bottom:var(--ig-footer-gap-bottom);display:flex;justify-content:center;}
+  .ig-footer img{display:block;width:100%;height:auto;}
+
+  .toolbar{position:absolute;left:10px;top:10px;display:flex;gap:6px;background:rgba(255,255,255,.85);padding:6px;border-radius:10px;border:1px solid #e5e5e5;z-index:2;transform:scale(var(--ig-scale));transform-origin:top left;}
   .mini{font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;}
   .mini.warn{border-color:#ffcfb8;background:#fff2ec;}
   .hidden{display:none;}
@@ -110,7 +138,7 @@
 
       <label class="btn secondary invisible-import">
         選擇「圖片資料夾」
-        <input id="pickFolder" type="file" webkitdirectory directory multiple accept="image/*" style="display:none" />
+        <input id="pickFolder" type="file" webkitdirectory directory multiple accept="image/*,.webp" style="display:none" />
       </label>
 
       <label class="btn secondary invisible-import">
@@ -126,7 +154,7 @@
 
       <label class="btn secondary" style="display:flex;align-items:center;gap:6px">
         寬度
-        <input id="widthPx" class="input" type="number" min="600" step="10" value="1200" style="width:90px" />
+        <input id="widthPx" class="input" type="number" min="600" step="10" value="1000" style="width:90px" />
       </label>
 
       <label class="btn secondary" style="display:flex;align-items:center;gap:6px">
@@ -136,7 +164,12 @@
 
       <label class="btn secondary" style="display:flex;align-items:center;gap:6px">
         圖片高
-        <input id="imgHeight" class="input" type="number" min="100" step="10" value="280" style="width:80px" />
+        <input id="imgHeight" class="input" type="number" min="100" step="10" value="244" style="width:80px" />
+      </label>
+
+      <label class="btn secondary" style="display:flex;align-items:center;gap:6px">
+        字級
+        <input id="fontSize" class="input" type="number" min="1" step="1" value="30" style="width:80px" />
       </label>
     
 
@@ -153,7 +186,7 @@
         <input id="pickReworkSheet" type="file" accept=".xlsx,.xls,.csv" style="display:none" />
       </label>
       <button id="clearAll" class="btn secondary">清除內容</button>
-		      <button id="downloadJPG" class="btn">下載 JPG</button>
+		      <button id="downloadJPG" class="btn">下載高解析 PNG</button>
 
     </div>
   </header>
@@ -187,15 +220,130 @@
     /* ===== 全域狀態 ===== */
     let editMode = true;
     let slotCount = 27;
-    let imgHeight = 280;
+    let imgHeight = 244;
     // rowsByIndex 內部格式：{ item: 主標, imgKey: 圖片對應鍵(主標下方那格), copy: 紅字文案(圖片名稱下方那格) }
-    const state = { images: [], rowsByIndex: [], original: {} };
+    const state = { images: [], rowsByIndex: [], original: {}, sections: [], bottomImageDataUrl: 'data:image/png;base64,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' };
+    const SECTION_BG_COLORS = ['#f9c1b6', '#c6daf6', '#ffe7a6', '#ecdec7'];
     // 若已載入編輯檔(JSON)，則鎖住已存在的圖片編輯成果：之後匯入工單(XLSX/CSV)只更新文字，不覆蓋圖片
     let lockEditedImages = false;
 
     const grid = document.getElementById('grid');
     const wrap = document.getElementById('canvasWrap');
     const toast = document.getElementById('toast');
+
+    function getCards(){ return [...grid.querySelectorAll('.card')]; }
+    function getCardAt(index){ return getCards()[index] || null; }
+
+    function getThumbParts(card){
+      return {
+        thumb: card.querySelector('.thumb'),
+        imgWrap: card.querySelector('.img-transform'),
+        img: card.querySelector('img'),
+        ph: card.querySelector('.ph')
+      };
+    }
+
+    function defaultImageTransform(){
+      return { x:0, y:0, scale:1 };
+    }
+
+    function getImageTransform(card){
+      return card._imgTransform ? { ...card._imgTransform } : defaultImageTransform();
+    }
+
+    function applyImageTransform(card){
+      const { imgWrap, img, ph } = getThumbParts(card);
+      if(!imgWrap || !img || !ph) return;
+      applyDefaultImageFit(img);
+      const t = getImageTransform(card);
+      imgWrap.style.transform = `translate(-50%, -50%) translate(${t.x}px, ${t.y}px) scale(${t.scale})`;
+      ph.style.display = img.getAttribute('src') ? 'none' : 'flex';
+    }
+
+    function setImageTransform(card, patch={}){
+      card._imgTransform = { ...getImageTransform(card), ...patch };
+      applyImageTransform(card);
+    }
+
+    function resetImageTransform(card){
+      card._imgTransform = defaultImageTransform();
+      applyImageTransform(card);
+    }
+
+    function wireThumbInteractions(card){
+      const { thumb, imgWrap, img } = getThumbParts(card);
+      if(!thumb || !imgWrap || !img || thumb.dataset.wired === '1') return;
+      thumb.dataset.wired = '1';
+
+      thumb.addEventListener('contextmenu', e => e.preventDefault());
+
+      let mode = null;
+      let startX = 0;
+      let startY = 0;
+      let startTransform = defaultImageTransform();
+
+      thumb.addEventListener('wheel', e=>{
+        if(!img.getAttribute('src')) return;
+        e.preventDefault();
+        const t = getImageTransform(card);
+        const delta = -e.deltaY * 0.001;
+        setImageTransform(card, { scale: Math.max(0.05, t.scale + delta) });
+        saveAutoDebounced();
+      }, { passive:false });
+
+      thumb.addEventListener('mousedown', e=>{
+        if(!img.getAttribute('src')) return;
+
+        if(e.button === 0){
+          mode = 'move';
+        }else if(e.button === 2){
+          mode = 'scale';
+        }else{
+          return;
+        }
+
+        e.preventDefault();
+        thumb.classList.add('dragging');
+        startX = e.clientX;
+        startY = e.clientY;
+        startTransform = getImageTransform(card);
+
+        const onMove = ev=>{
+          if(!mode) return;
+          ev.preventDefault();
+
+          if(mode === 'move'){
+            setImageTransform(card, {
+              x: startTransform.x + (ev.clientX - startX),
+              y: startTransform.y + (ev.clientY - startY),
+            });
+          }else if(mode === 'scale'){
+            const deltaX = ev.clientX - startX;
+            setImageTransform(card, {
+              scale: Math.max(0.05, startTransform.scale + deltaX * 0.01),
+            });
+          }
+        };
+
+        const onUp = ()=>{
+          mode = null;
+          thumb.classList.remove('dragging');
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+          saveAutoDebounced();
+        };
+
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+      });
+
+      img.addEventListener('load', ()=>{
+        applyDefaultImageFit(img);
+        if(!card._imgTransform) card._imgTransform = defaultImageTransform();
+        applyImageTransform(card);
+      });
+      applyImageTransform(card);
+    }
 
     /* ===== Toast ===== */
     function showToast(text, type='ok', ms=1800){
@@ -206,6 +354,39 @@
       if(type !== 'load'){ setTimeout(()=> el.remove(), ms); }
       return el;
     }
+
+    async function imageSrcToDataURL(src){
+      if(!src) return '';
+      if(/^data:/.test(src)) return src;
+      return await new Promise((resolve, reject)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          try{
+            const c = document.createElement('canvas');
+            c.width = img.naturalWidth || img.width;
+            c.height = img.naturalHeight || img.height;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            resolve(c.toDataURL('image/png'));
+          }catch(err){
+            reject(err);
+          }
+        };
+        img.onerror = ()=> reject(new Error('圖片轉 DataURL 失敗'));
+        img.src = src;
+      }).catch(()=> '');
+    }
+
+    async function ensureAllImagesEmbedded(){
+      const imgs = [...document.querySelectorAll('img')];
+      for(const img of imgs){
+        const src = img.getAttribute('src') || '';
+        if(!src || /^data:/.test(src)) continue;
+        const safe = await imageSrcToDataURL(src);
+        if(safe) img.src = safe;
+      }
+    }
+
 
     /* ===== 檢查同層字型是否有成功載入 ===== */
     function checkCustomFontsLoaded(){
@@ -234,18 +415,45 @@
     /* ===== 檔名去副檔名（比對用） ===== */
     function fileBaseName(name){ return name.replace(/\.[^.]+$/,'').trim(); }
 
+    function fileToDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = ()=> resolve(reader.result || '');
+        reader.onerror = ()=> reject(reader.error || new Error('讀取圖片失敗'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+
+    function sanitizeShareText(text){
+      return (text || '').replace(/\s+/g,'').trim();
+    }
+
+    function applyDefaultImageFit(img){
+      if(!img) return;
+      img.style.maxWidth = 'none';
+      img.style.maxHeight = 'none';
+      img.style.width = 'auto';
+      img.style.height = '100%';
+      img.style.objectFit = 'contain';
+      img.style.display = 'block';
+      img.style.margin = '0';
+    }
+
+
     /* ===== 自動暫存：LocalStorage ===== */
     const AUTO_KEY = 'edm_autosave_v8';
     function captureDraftFromDOM(){
-      const cards = [...grid.children];
+      const cards = getCards();
       return {
-        meta: { slotCount, width: wrap.style.maxWidth || '1200px', imgHeight, page: PAGE_NAME, version: 8, ts: Date.now() },
+        meta: { slotCount, width: wrap.style.maxWidth || '1000px', imgHeight, fontSize: Number(getComputedStyle(document.documentElement).getPropertyValue('--font-size-main').replace('px','')) || 30, page: PAGE_NAME, version: 10, ts: Date.now() },
         items: cards.map(card=>{
           const img   = card.querySelector('img');
           const brand = card.querySelector('.brand').textContent;
-          const share = card.querySelector('.share').textContent;
+          const share = sanitizeShareText(card.querySelector('.share').textContent);
           const src   = img.getAttribute('src') || '';
-          return { img: src, brand, share };
+          const bgColor = getComputedStyle(card).getPropertyValue('--bg').trim() || '';
+          return { img: src, brand, share, bgColor, imgTransform: getImageTransform(card) };
         })
       };
     }
@@ -263,65 +471,136 @@
         }
         slotCount = Number(data?.meta?.slotCount || slotCount);
         imgHeight = Number(data?.meta?.imgHeight || imgHeight);
+        state.bottomImageDataUrl = data?.meta?.bottomImageDataUrl || state.bottomImageDataUrl || '';
         document.getElementById('slotCount').value = slotCount;
         document.getElementById('imgHeight').value = imgHeight;
-        document.documentElement.style.setProperty('--img-height', imgHeight+'px');
+        document.documentElement.style.setProperty('--card-height', imgHeight+'px');
+        const fontSize = Number(data?.meta?.fontSize || 30);
+        document.getElementById('fontSize').value = fontSize;
+        document.documentElement.style.setProperty('--font-size-main', fontSize+'px');
         wrap.style.maxWidth = data?.meta?.width || wrap.style.maxWidth;
 
         adjustGridSize(slotCount);
         (data.items||[]).forEach((it,i)=>{
-          const card = grid.children[i];
+          const card = getCardAt(i);
           if(!card) return;
           const img   = card.querySelector('img');
           const ph    = card.querySelector('.ph');
           const brand = card.querySelector('.brand');
           const share = card.querySelector('.share');
-          if(it.img){ img.src = it.img; ph.style.display='none'; } else { img.removeAttribute('src'); ph.style.display='flex'; }
+          if(it.img){
+            img.src = it.img;
+            applyDefaultImageFit(img);
+            ph.style.display='none';
+          } else { img.removeAttribute('src'); ph.style.display='flex'; }
           brand.textContent = it.brand || '';
-          share.textContent = it.share || '';
+          share.textContent = sanitizeShareText(it.share || '');
+          card.style.setProperty('--bg', it.bgColor || (state.rowsByIndex[i]?.bgColor || '#ffbd83'));
+          card._imgTransform = { ...defaultImageTransform(), ...(it.imgTransform || {}) };
+          wireThumbInteractions(card);
+          applyImageTransform(card);
         });
         return true;
       }catch(e){ return false; }
     }
 
     /* ===== 工單解析 ===== */
-    function rowsFromGridPattern(arr){
-      const out = [];
-      let group = 0;
-      while (true){
-        const nameRow = 1 + 3*group;
-        const imgRow  = 2 + 3*group;
-        const copyRow = 3 + 3*group;
+    function getMergedRangeMap(ws){
+      const map = new Map();
+      (ws['!merges'] || []).forEach(m => {
+        map.set(`${m.s.r}:${m.s.c}`, m);
+      });
+      return map;
+    }
 
-        const nIdx = nameRow - 1, iIdx = imgRow - 1, cIdx = copyRow - 1;
-        if (nIdx >= arr.length && iIdx >= arr.length && cIdx >= arr.length) break;
-
-        const names  = arr[nIdx] || [];
-        const imgK   = arr[iIdx] || [];
-        const copies = arr[cIdx] || [];
-
-        const items = [];
-        for (let col=0; col<3; col++){
-          const item  = (names[col]  ?? '').toString().trim();
-          const imgKey= (imgK[col]   ?? '').toString().trim();
-          const copy  = (copies[col] ?? '').toString().trim();
-          items.push({ item, imgKey, copy });
+    function findAnchorCell(arr, keyword){
+      for(let r=0; r<arr.length; r++){
+        const row = arr[r] || [];
+        for(let c=0; c<row.length; c++){
+          const text = (row[c] ?? '').toString().trim();
+          if(text === keyword) return { r, c };
         }
-
-        const any = items.some(it => it.item || it.imgKey || it.copy);
-        if (!any) break;
-
-        out.push(...items);
-        group++;
       }
-      while (out.length && !out[out.length-1].item && !out[out.length-1].imgKey && !out[out.length-1].copy){
-        out.pop();
+      return null;
+    }
+
+    function parseFeaturedSections(ws){
+      const arr = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      const anchor = findAnchorCell(arr, PAGE_NAME);
+      if(!anchor) throw new Error(`找不到「${PAGE_NAME}」座標`);
+
+      const merges = getMergedRangeMap(ws);
+      const sections = [];
+      for(let r = anchor.r + 1; r < arr.length; r++){
+        const row = arr[r] || [];
+        for(let c = anchor.c; c < row.length; c++){
+          const text = (row[c] ?? '').toString().trim();
+          if(!text) continue;
+          const merge = merges.get(`${r}:${c}`);
+          if(!merge) continue;
+          const isHorizontal = merge.s.r === r && merge.s.c === c && merge.e.c > merge.s.c;
+          if(!isHorizontal) continue;
+          if(text === PAGE_NAME) continue;
+          sections.push({
+            title: text,
+            startRow: r,
+            startCol: c,
+            endCol: Math.min(merge.e.c, c + 2),
+            sectionIndex: sections.length,
+          });
+          break;
+        }
       }
+
+      if(!sections.length) throw new Error('找不到區塊起始（掛標/合併儲存格）');
+
+      const out = [];
+      const normalizedSections = [];
+      let seq = 1;
+      sections.forEach((section, idx) => {
+        const endRow = (sections[idx + 1]?.startRow ?? arr.length) - 1;
+        const bgColor = SECTION_BG_COLORS[idx % SECTION_BG_COLORS.length];
+        const rowStartIndex = out.length;
+        let rowCount = 0;
+        for(let r = section.startRow + 1; r <= endRow; r += 2){
+          const nameRow = arr[r] || [];
+          const copyRow = arr[r + 1] || [];
+          let rowHasData = false;
+          for(let c = section.startCol; c <= section.endCol; c++){
+            const item = (nameRow[c] ?? '').toString().replace(/\s+/g, ' ').trim();
+            const copy = (copyRow[c] ?? '').toString().replace(/\s+/g, '').trim();
+            if(item || copy){
+              rowHasData = true;
+              out.push({
+                item,
+                copy,
+                seq,
+                sectionIndex: idx,
+                sectionTitle: section.title,
+                bgColor,
+              });
+              seq++;
+            }
+          }
+          if(rowHasData) rowCount++;
+          if(!rowHasData && r + 1 > endRow) break;
+        }
+        normalizedSections.push({
+          sectionIndex: idx,
+          sectionTitle: section.title,
+          bgColor,
+          startItemIndex: rowStartIndex,
+          itemCount: out.length - rowStartIndex,
+          rowCount,
+        });
+      });
+
+      state.sections = normalizedSections.filter(s => s.itemCount > 0);
       return out;
     }
 
     /* ===== 建卡 / 調整格數 ===== */
-    function createCard({url, item='', c1='', idx}) {
+    function createCard({url, item='', c1='', idx, bgColor=''}) {
       const card = document.createElement('article');
       card.className = 'card';
       card.dataset.idx = idx;
@@ -333,14 +612,19 @@
             <button class="mini change">換圖</button>
             <button class="mini warn revert">還原</button>
           </div>
-          <div class="ph">圖片 ${idx+1}</div>
-          <img alt="">
+          <div class="img-stage">
+            <div class="ph">圖片 ${idx+1}</div>
+            <div class="img-transform"><img alt=""></div>
+          </div>
+          
           <div class="play"><span class="tri">▶</span></div>
-          <input type="file" accept="image/*" class="hidden picker" />
+          <input type="file" accept="image/*,.webp" class="hidden picker" />
         </div>
         <div class="meta">
-          <p class="brand" ${editMode?'contenteditable':''}></p>
-          <p class="share" ${editMode?'contenteditable':''}></p>
+          <div class="meta-line">
+            <span class="brand" ${editMode?'contenteditable':''}></span>
+            <span class="share" ${editMode?'contenteditable':''}></span>
+          </div>
         </div>
       `;
 
@@ -350,19 +634,40 @@
       const share = card.querySelector('.share');
       const picker = card.querySelector('.picker');
 
-      if(url){ img.src = url; ph.style.display='none'; }
+      if(url){
+        img.src = url;
+        applyDefaultImageFit(img);
+        ph.style.display='none';
+      }
+      card._imgTransform = defaultImageTransform();
       brand.textContent = item || '';
-      share.textContent = c1 || '';
+      share.textContent = sanitizeShareText(c1 || '');
+      wireThumbInteractions(card);
+      applyImageTransform(card);
 
       // 初始狀態記錄（給「還原」用）
-      state.original[idx] = { url: url || '', brand: brand.textContent, share: share.textContent };
+      state.original[idx] = { url: url || '', brand: brand.textContent, share: sanitizeShareText(share.textContent), bgColor: bgColor || '', imgTransform: defaultImageTransform() };
+      if(bgColor){ card.style.setProperty('--bg', bgColor); }
 
       card.querySelector('.change').addEventListener('click', ()=> picker.click());
-      picker.addEventListener('change', e=>{
+      picker.addEventListener('change', async e=>{
         const f = e.target.files?.[0]; if(!f) return;
-        img.src = URL.createObjectURL(f);
-        ph.style.display = 'none';
-        saveAutoDebounced();
+        try{
+          img.src = await fileToDataURL(f);
+          applyDefaultImageFit(img);
+          ph.style.display = 'none';
+          resetImageTransform(card);
+          applyImageTransform(card);
+          saveAutoDebounced();
+        }catch(err){
+          console.error(err);
+          showToast('換圖失敗','err');
+        }
+      });
+
+      share.addEventListener('input', ()=>{
+        const cleaned = sanitizeShareText(share.textContent);
+        if(share.textContent !== cleaned) share.textContent = cleaned;
       });
 
       card.querySelector('.crop').addEventListener('click', ()=>{
@@ -372,196 +677,519 @@
 
       card.querySelector('.revert').addEventListener('click', ()=>{
         const o = state.original[idx]||{};
-        if(o.url){ img.src = o.url; ph.style.display='none'; }
+        if(o.url){
+          img.src = o.url;
+          applyDefaultImageFit(img);
+          ph.style.display='none';
+        }
         else { img.removeAttribute('src'); ph.style.display='flex'; }
         brand.textContent = o.brand??'';
-        share.textContent = o.share??'';
+        share.textContent = sanitizeShareText(o.share??'');
+        card.style.setProperty('--bg', o.bgColor || '#ffbd83');
+        card._imgTransform = { ...defaultImageTransform(), ...((o.imgTransform)||{}) };
+        applyImageTransform(card);
         saveAutoDebounced();
       });
 
       return card;
     }
-    function appendCard(i){
-      const row = state.rowsByIndex[i] || { item:'', imgKey:'', copy:'' };
-      grid.appendChild(createCard({ url:'', item: row.item, c1: row.copy, idx: i }));
+    function createSectionBlock(section, sectionCards){
+      const pageEl = document.createElement('section');
+      pageEl.className = 'ig-page';
+      pageEl.dataset.sectionIndex = section.sectionIndex ?? '';
+      pageEl.style.setProperty('--section-bg', section.bgColor || '#fff');
+
+      const titleWrap = document.createElement('div');
+      titleWrap.className = 'ig-title-wrap';
+      const titleEl = document.createElement('h2');
+      titleEl.className = 'ig-title';
+      titleEl.textContent = section.sectionTitle || PAGE_NAME;
+      titleWrap.appendChild(titleEl);
+
+      const sectionEl = document.createElement('div');
+      sectionEl.className = 'section-block';
+      sectionEl.style.setProperty('--section-bg', section.bgColor || '#fff');
+
+      const sectionGrid = document.createElement('div');
+      sectionGrid.className = 'section-grid';
+      sectionCards.forEach(card => sectionGrid.appendChild(card));
+      sectionEl.appendChild(sectionGrid);
+
+      const footer = document.createElement('div');
+      footer.className = 'ig-footer';
+      footer.innerHTML = state.bottomImageDataUrl ? `<img src="${state.bottomImageDataUrl}" alt="吸底圖">` : '';
+
+      pageEl.appendChild(titleWrap);
+      pageEl.appendChild(sectionEl);
+      pageEl.appendChild(footer);
+      return pageEl;
     }
+
+    function renderSectionsLayout(){
+      const existingCards = getCards();
+      const cardMap = new Map(existingCards.map(card => [Number(card.dataset.idx), card]));
+      grid.innerHTML = '';
+
+      const sections = (state.sections && state.sections.length)
+        ? state.sections
+        : [{ sectionIndex: 0, sectionTitle: PAGE_NAME, bgColor: SECTION_BG_COLORS[0], startItemIndex: 0, itemCount: slotCount }];
+
+      sections.forEach((section, sidx) => {
+        const start = Number(section.startItemIndex || 0);
+        const count = Number(section.itemCount || 0);
+        const cards = [];
+        for(let i=start; i<start+count; i++){
+          let card = cardMap.get(i);
+          if(!card){
+            const row = state.rowsByIndex[i] || { item:'', copy:'', bgColor: section.bgColor || SECTION_BG_COLORS[sidx % SECTION_BG_COLORS.length] };
+            card = createCard({ url:'', item: row.item, c1: row.copy, idx: i, bgColor: row.bgColor || section.bgColor });
+          }
+          const row = state.rowsByIndex[i] || {};
+          card.style.setProperty('--bg', row.bgColor || section.bgColor || SECTION_BG_COLORS[sidx % SECTION_BG_COLORS.length]);
+          cards.push(card);
+        }
+        if(cards.length){
+          grid.appendChild(createSectionBlock(section, cards));
+        }
+      });
+    }
+
     function adjustGridSize(newCount){
-      const current = grid.children.length;
-      if(newCount > current){
-        for(let i=current;i<newCount;i++) appendCard(i);
-      }else if(newCount < current){
-        for(let i=current-1;i>=newCount;i--) grid.removeChild(grid.children[i]);
-      }
       slotCount = newCount;
+      renderSectionsLayout();
     }
     function applyRowsToDOM(){
-      [...grid.children].forEach((card,i)=>{
-        const row = state.rowsByIndex[i] || { item:'', imgKey:'', copy:'' };
+      renderSectionsLayout();
+      getCards().forEach((card,i)=>{
+        const row = state.rowsByIndex[i] || { item:'', copy:'', bgColor:'' };
         card.querySelector('.brand').textContent = row.item || '';
-        card.querySelector('.share').textContent = row.copy || '';
+        card.querySelector('.share').textContent = sanitizeShareText(row.copy || '');
+        card.style.setProperty('--bg', row.bgColor || '#ffbd83');
+        wireThumbInteractions(card);
+        applyImageTransform(card);
+        const sectionEl = card.closest('.section-block');
+        if(sectionEl) sectionEl.style.setProperty('--section-bg', row.bgColor || '#ffbd83');
       });
       saveAutoDebounced();
     }
     function setEditModeUI(){
-      [...grid.children].forEach(card=>{
+      getCards().forEach(card=>{
         const tb = card.querySelector('.toolbar');
         const brand = card.querySelector('.brand');
         const share = card.querySelector('.share');
+        const row = state.rowsByIndex[Number(card.dataset.idx)] || {};
+        if(row.bgColor){ card.style.setProperty('--bg', row.bgColor); }
         tb.classList.toggle('hidden', !editMode);
         brand.toggleAttribute('contenteditable', editMode);
         share.toggleAttribute('contenteditable', editMode);
       });
     }
 
-    /* ===== JPG 匯出（每 3 排一張） ===== */
-    async function captureJPGByPages(){
-      const desired = Math.max(600, Number(document.getElementById('widthPx').value||1200));
-      const cols = 3, rowsPerPage = 3, perPage = cols * rowsPerPage;
-      const cards = [...grid.children]; const total = cards.length;
-      if (!total){ showToast('沒有可下載的內容','err'); return; }
+    /* ===== JPG 匯出（每區一張，寬 1200 / 高自動） ===== */
+    function getSectionGroups(){
+      const cards = getCards();
+      const groups = [];
+      const sections = state.sections?.length ? state.sections : [];
 
-      const cs   = getComputedStyle(wrap);
-      const padL = parseInt(cs.paddingLeft)  || 0;
-      const padR = parseInt(cs.paddingRight) || 0;
-      const padT = parseInt(cs.paddingTop)   || 0;
-      const padB = padL;
+      if(sections.length){
+        sections.forEach((section, idx) => {
+          const sectionCards = cards.slice(section.startItemIndex, section.startItemIndex + section.itemCount);
+          if(sectionCards.length){
+            groups.push({
+              sectionIndex: section.sectionIndex ?? idx,
+              sectionNumber: idx + 1,
+              sectionTitle: section.sectionTitle || PAGE_NAME,
+              bgColor: section.bgColor || SECTION_BG_COLORS[idx % SECTION_BG_COLORS.length],
+              cards: sectionCards,
+              rowCount: section.rowCount || Math.ceil(sectionCards.length / 3),
+            });
+          }
+        });
+        return groups;
+      }
 
-      document.body.classList.add('capturing');
-      wrap.classList.add('capture-pad');
-
-      let pageNo = 1;
-      for (let start = 0; start < total; start += perPage, pageNo++){
-        const end = Math.min(start + perPage, total);
-
-        const clone = wrap.cloneNode(true);
-        clone.style.maxWidth      = desired + 'px';
-        clone.style.width         = desired + 'px';
-        clone.style.paddingTop    = padT + 'px';
-        clone.style.paddingLeft   = padL + 'px';
-        clone.style.paddingRight  = padR + 'px';
-        clone.style.paddingBottom = (padB + 10) + 'px';
-        clone.style.position = 'fixed';
-        clone.style.left = '-99999px';
-        clone.style.top  = '0';
-        document.body.appendChild(clone);
-
-        const gridClone = clone.querySelector('.grid');
-        gridClone.innerHTML = '';
-        for (let i = start; i < end; i++){
-          gridClone.appendChild(cards[i].cloneNode(true));
+      let current = null;
+      cards.forEach((card, idx) => {
+        const row = state.rowsByIndex[idx] || {};
+        if(!current || current.sectionIndex !== row.sectionIndex){
+          current = {
+            sectionIndex: row.sectionIndex,
+            sectionNumber: groups.length + 1,
+            sectionTitle: row.sectionTitle || PAGE_NAME,
+            bgColor: row.bgColor || SECTION_BG_COLORS[groups.length % SECTION_BG_COLORS.length],
+            cards: [],
+            rowCount: 0,
+          };
+          groups.push(current);
         }
-        gridClone.style.gridTemplateColumns = 'repeat(3, 1fr)';
-
-        const canvas = await html2canvas(clone, { useCORS:true, backgroundColor:'#fff', scale:1 });
-
-        const a = document.createElement('a');
-        a.download = `更多精選商品_${pageNo}.jpg`;
-        a.href = canvas.toDataURL('image/jpeg', 0.95);
-        a.click();
-
-        clone.remove();
-      }
-
-      wrap.classList.remove('capture-pad');
-      document.body.classList.remove('capturing');
-      showToast(`已下載 ${Math.ceil(total/perPage)} 張 JPG`,'ok');
-    }
-
-    async function renderPageToBlob({cards, start, end, desired, padT, padL, padR, padB}){
-      const clone = wrap.cloneNode(true);
-      clone.style.maxWidth      = desired + 'px';
-      clone.style.width         = desired + 'px';
-      clone.style.paddingTop    = padT + 'px';
-      clone.style.paddingLeft   = padL + 'px';
-      clone.style.paddingRight  = padR + 'px';
-      clone.style.paddingBottom = (padB + 10) + 'px';
-      clone.style.position = 'fixed';
-      clone.style.left = '-99999px';
-      clone.style.top  = '0';
-      document.body.appendChild(clone);
-
-      const gridClone = clone.querySelector('.grid');
-      gridClone.innerHTML = '';
-      for (let i = start; i < end; i++){
-        gridClone.appendChild(cards[i].cloneNode(true));
-      }
-      gridClone.style.gridTemplateColumns = 'repeat(3, 1fr)';
-
-      const canvas = await html2canvas(clone, { useCORS:true, backgroundColor:'#fff', scale:1 });
-      clone.remove();
-
-      const blob = await new Promise(resolve=>{
-        try { canvas.toBlob(b=>resolve(b),'image/jpeg',0.95); }
-        catch { resolve(null); }
+        current.cards.push(card);
       });
-      if (blob) return blob;
-
-      const dataURL = canvas.toDataURL('image/jpeg', 0.95);
-      const byteString = atob(dataURL.split(',')[1]);
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i=0;i<byteString.length;i++) ia[i] = byteString.charCodeAt(i);
-      return new Blob([ab], {type:'image/jpeg'});
+      groups.forEach(g => { g.rowCount = Math.ceil(g.cards.length / 3); });
+      return groups.filter(g => g.cards.length);
     }
 
-    /* ===== 下載到資料夾（逐張另存） ===== */
-    async function downloadJPGToFolder(){
-      const desired = Math.max(600, Number(document.getElementById('widthPx').value||1200));
-      const cols = 3, rowsPerPage = 3, perPage = cols * rowsPerPage;
+    async function canvasToBlobSafe(canvas){
+      return await new Promise((resolve, reject)=>{
+        try{
+          canvas.toBlob((blob)=>{
+            if(blob) resolve(blob);
+            else reject(new Error('Canvas 轉檔失敗'));
+          }, 'image/png');
+        }catch(err){
+          reject(err);
+        }
+      });
+    }
 
-      const cards = [...grid.children];
-      const total = cards.length;
-      if (!total){ showToast('沒有可下載的內容','err'); return; }
+    async function canvasToBlob(canvas, backgroundColor){
+      return await canvasToBlobSafe(canvas);
+    }
 
-      const cs   = getComputedStyle(wrap);
-      const padL = parseInt(cs.paddingLeft)  || 0;
-      const padR = parseInt(cs.paddingRight) || 0;
-      const padT = parseInt(cs.paddingTop)   || 0;
-      const padB = padL;
 
-      const hasFSP = 'showSaveFilePicker' in window;
+    function buildExportCard(card){
+      const cardClone = card.cloneNode(true);
+      cardClone.style.width = '377px';
+      cardClone.style.background = 'transparent';
+      cardClone.style.padding = '0';
+      const thumb = cardClone.querySelector('.thumb');
+      if(thumb){
+        thumb.style.width = '377px';
+        thumb.style.height = '244px';
+        thumb.style.minHeight = '244px';
+        thumb.style.background = '#fff';
+        thumb.style.display = 'flex';
+        thumb.style.alignItems = 'center';
+        thumb.style.justifyContent = 'center';
+        thumb.style.overflow = 'hidden';
+      }
+      const img = cardClone.querySelector('img');
+      if(img){
+        img.style.maxWidth = 'none';
+        img.style.maxHeight = 'none';
+        img.style.width = 'auto';
+        img.style.height = 'auto';
+        img.style.objectFit = 'contain';
+        img.style.display = 'block';
+        img.style.margin = '0';
+      }
+      const cloneWrap = cardClone.querySelector('.img-transform');
+      const sourceWrap = card.querySelector('.img-transform');
+      if(cloneWrap && sourceWrap){
+        cloneWrap.style.transform = sourceWrap.style.transform || 'translate(-50%, -50%) scale(1)';
+      }
+      const brand = cardClone.querySelector('.brand');
+      const share = cardClone.querySelector('.share');
+      if(brand) brand.style.fontSize = '30px';
+      if(share) share.style.fontSize = '30px';
+      const meta = cardClone.querySelector('.meta');
+      if(meta) meta.style.padding = '21px 0 0';
+      cardClone.querySelectorAll('.toolbar').forEach(el=>el.remove());
+      cardClone.querySelectorAll('.picker').forEach(el=>el.remove());
+      cardClone.querySelectorAll('.img-hint').forEach(el=>el.remove());
+      return cardClone;
+    }
+
+    async function renderIGSectionToBlob(group){
+      const exportWidth = 1000;
+      const exportHeight = 1000;
+      const contentWidth = 846;
+      const sourceWidth = 1200;
+      const scaleRatio = contentWidth / sourceWidth;
+
+      const igCards = (group.cards || []).slice(0, 9);
+
+      const exportWrap = document.createElement('div');
+      exportWrap.style.position = 'fixed';
+      exportWrap.style.left = '-99999px';
+      exportWrap.style.top = '0';
+      exportWrap.style.width = exportWidth + 'px';
+      exportWrap.style.height = exportHeight + 'px';
+      exportWrap.style.background = '#f8e8d9';
+      exportWrap.style.overflow = 'hidden';
+      exportWrap.style.boxSizing = 'border-box';
+
+      const pageEl = document.createElement('section');
+      pageEl.className = 'ig-page';
+      pageEl.style.width = exportWidth + 'px';
+      pageEl.style.height = exportHeight + 'px';
+      pageEl.style.background = '#f8e8d9';
+      pageEl.style.margin = '0 auto';
+      pageEl.style.boxSizing = 'border-box';
+      pageEl.style.position = 'relative';
+      pageEl.style.overflow = 'hidden';
+
+      const titleWrap = document.createElement('div');
+      titleWrap.className = 'ig-title-wrap';
+      titleWrap.style.position = 'absolute';
+      titleWrap.style.left = '0';
+      titleWrap.style.top = '65px';
+      titleWrap.style.width = '100%';
+      titleWrap.style.display = 'flex';
+      titleWrap.style.justifyContent = 'center';
+      titleWrap.style.margin = '0';
+      titleWrap.style.padding = '0';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'ig-title';
+      titleEl.textContent = group.sectionTitle || PAGE_NAME;
+      titleEl.style.fontSize = '48px';
+      titleEl.style.fontWeight = '700';
+      titleEl.style.lineHeight = '1';
+      titleEl.style.color = '#fff';
+      titleEl.style.background = '#ee4d2d';
+      titleEl.style.borderRadius = '9999px';
+      titleEl.style.height = '66px';
+      titleEl.style.minHeight = '66px';
+      titleEl.style.padding = '0 28px';
+      titleEl.style.margin = '0';
+      titleEl.style.display = 'inline-flex';
+      titleEl.style.alignItems = 'center';
+      titleEl.style.justifyContent = 'center';
+      titleEl.style.boxSizing = 'border-box';
+      titleWrap.appendChild(titleEl);
+
+      const titleBottom = 65 + 66;
+      const blockTop = titleBottom + 38;
+
+      const scaledOuter = document.createElement('div');
+      scaledOuter.style.width = contentWidth + 'px';
+      scaledOuter.style.position = 'absolute';
+      scaledOuter.style.left = ((exportWidth - contentWidth) / 2) + 'px';
+      scaledOuter.style.top = blockTop + 'px';
+      scaledOuter.style.margin = '0';
+      scaledOuter.style.padding = '0';
+      scaledOuter.style.display = 'block';
+      scaledOuter.style.height = 'auto';
+      scaledOuter.style.overflow = 'visible';
+
+      const scaledStage = document.createElement('div');
+      scaledStage.style.width = sourceWidth + 'px';
+      scaledStage.style.transform = 'scale(' + scaleRatio + ')';
+      scaledStage.style.transformOrigin = 'top left';
+      scaledStage.style.display = 'inline-block';
+
+      const sectionEl = document.createElement('div');
+      sectionEl.className = 'section-block';
+      sectionEl.style.width = sourceWidth + 'px';
+      sectionEl.style.margin = '0';
+      sectionEl.style.background = group.bgColor || '#fff';
+      sectionEl.style.padding = '17px';
+      sectionEl.style.boxSizing = 'border-box';
+
+      const sectionGrid = document.createElement('div');
+      sectionGrid.className = 'section-grid';
+      sectionGrid.style.display = 'grid';
+      sectionGrid.style.gridTemplateColumns = 'repeat(3,377px)';
+      sectionGrid.style.columnGap = '17px';
+      sectionGrid.style.rowGap = '17px';
+      sectionGrid.style.justifyContent = 'start';
+
+      igCards.forEach((card) => {
+        sectionGrid.appendChild(buildExportCard(card));
+      });
+
+      sectionEl.appendChild(sectionGrid);
+      scaledStage.appendChild(sectionEl);
+      scaledOuter.appendChild(scaledStage);
+
+      const rowCount = Math.max(1, Math.ceil(igCards.length / 3));
+      const thumbHeight = 244;
+      const metaHeight = 55;
+      const rowGap = 17;
+      const blockPadTop = 17;
+      const blockPadBottom = 17;
+      const sourceHeight = blockPadTop + blockPadBottom + (rowCount * (thumbHeight + metaHeight)) + (Math.max(0, rowCount - 1) * rowGap);
+      const scaledBlockHeight = Math.ceil(sourceHeight * scaleRatio);
+      scaledOuter.style.height = scaledBlockHeight + 'px';
+
+      const footer = document.createElement('div');
+      footer.className = 'ig-footer';
+      footer.style.position = 'absolute';
+      footer.style.left = '0';
+      footer.style.top = (blockTop + scaledBlockHeight + 15) + 'px';
+      footer.style.width = exportWidth + 'px';
+      footer.style.margin = '0';
+      footer.style.padding = '0';
+      footer.style.display = 'flex';
+      footer.style.justifyContent = 'center';
+
+      if(state.bottomImageDataUrl){
+        const footerImg = document.createElement('img');
+        footerImg.src = state.bottomImageDataUrl;
+        footerImg.alt = '吸底圖';
+        footerImg.style.display = 'block';
+        footerImg.style.width = exportWidth + 'px';
+        footerImg.style.maxWidth = exportWidth + 'px';
+        footerImg.style.height = 'auto';
+        footer.style.height = 'auto';
+        footer.appendChild(footerImg);
+      }
+
+      pageEl.appendChild(titleWrap);
+      pageEl.appendChild(scaledOuter);
+      pageEl.appendChild(footer);
+
+      exportWrap.appendChild(pageEl);
+      document.body.appendChild(exportWrap);
+
+      await new Promise(resolve => requestAnimationFrame(() => resolve()));
+      await new Promise(resolve => requestAnimationFrame(() => resolve()));
+
+      const canvas = await html2canvas(pageEl, {
+        useCORS:false,
+        allowTaint:false,
+        backgroundColor:'#f8e8d9',
+        scale:2,
+        width: exportWidth,
+        height: exportHeight
+      });
+      exportWrap.remove();
+      return canvasToBlob(canvas, '#f8e8d9');
+    }
+
+    async function renderBlockSectionToBlob(group){
+      const exportWidth = 1200;
+      const exportWrap = document.createElement('div');
+      exportWrap.style.position = 'fixed';
+      exportWrap.style.left = '-99999px';
+      exportWrap.style.top = '0';
+      exportWrap.style.width = exportWidth + 'px';
+      exportWrap.style.background = group.bgColor || '#fff';
+
+      const sectionEl = document.createElement('section');
+      sectionEl.style.width = exportWidth + 'px';
+      sectionEl.style.background = group.bgColor || '#fff';
+      sectionEl.style.padding = '17px';
+
+      const sectionGrid = document.createElement('div');
+      sectionGrid.style.display = 'grid';
+      sectionGrid.style.gridTemplateColumns = 'repeat(3,377px)';
+      sectionGrid.style.columnGap = '17px';
+      sectionGrid.style.rowGap = '17px';
+
+      group.cards.forEach((card) => {
+        const cardClone = card.cloneNode(true);
+        cardClone.style.width = '377px';
+        cardClone.style.background = 'transparent';
+
+        const thumb = cardClone.querySelector('.thumb');
+        if(thumb){
+          thumb.style.width = '377px';
+          thumb.style.height = '244px';
+          thumb.style.minHeight = '244px';
+          thumb.style.background = '#fff';
+        }
+
+        const img = cardClone.querySelector('img');
+        if(img){
+          img.style.maxWidth = '100%';
+          img.style.maxHeight = '100%';
+          img.style.width = 'auto';
+          img.style.height = 'auto';
+          img.style.objectFit = 'contain';
+          img.style.display = 'block';
+          img.style.margin = 'auto';
+        }
+
+        const brand = cardClone.querySelector('.brand');
+        const share = cardClone.querySelector('.share');
+        if(brand) brand.style.fontSize = '30px';
+        if(share) share.style.fontSize = '30px';
+
+        const meta = cardClone.querySelector('.meta');
+        if(meta) meta.style.padding = '21px 0 0';
+
+        const toolbar = cardClone.querySelector('.toolbar');
+        if(toolbar) toolbar.remove();
+
+        sectionGrid.appendChild(cardClone);
+      });
+
+      sectionEl.appendChild(sectionGrid);
+      exportWrap.appendChild(sectionEl);
+      document.body.appendChild(exportWrap);
+
+      const canvas = await html2canvas(sectionEl, { useCORS:false, allowTaint:false, backgroundColor: group.bgColor || '#fff', scale:2 });
+      exportWrap.remove();
+      return canvasToBlob(canvas, group.bgColor || '#fff');
+    }
+
+    async function downloadBlob(blob, fileName){
+      const a = document.createElement('a');
+      a.download = fileName;
+      a.href = URL.createObjectURL(blob);
+      a.click();
+      setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
+    }
+
+    async function captureJPGByPages(){
+      await ensureAllImagesEmbedded();
+      const groups = getSectionGroups();
+      const total = groups.length;
+      if (!total){ showToast('沒有可下載的分區內容','err'); return; }
 
       document.body.classList.add('capturing');
       wrap.classList.add('capture-pad');
 
       try{
-        let pageNo = 1;
-        for (let start = 0; start < total; start += perPage, pageNo++){
-          const end = Math.min(start + perPage, total);
-          const blob = await renderPageToBlob({cards, start, end, desired, padT, padL, padR, padB});
-          const suggestedName = `更多精選商品_${pageNo}.jpg`;
+        for (let i = 0; i < total; i++){
+          const igBlob = await renderIGSectionToBlob(groups[i]);
+          await downloadBlob(igBlob, `更多精選商品_IG圖_${String(i + 1).padStart(2, '0')}.png`);
 
-          if (hasFSP){
-            try{
-              const handle = await window.showSaveFilePicker({
-                suggestedName,
-                types: [{ description:'JPEG Image', accept:{ 'image/jpeg':['.jpg','.jpeg'] } }]
-              });
-              const writable = await handle.createWritable();
-              await writable.write(blob);
-              await writable.close();
-            }catch(e){
-              if(e?.name==='AbortError'){
-                showToast('已取消儲存','load',1600);
-                break;
-              }else{
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.download = suggestedName; a.href = url; a.click();
-                URL.revokeObjectURL(url);
+          const blockBlob = await renderBlockSectionToBlob(groups[i]);
+          await downloadBlob(blockBlob, `更多精選商品_區塊圖_${String(i + 1).padStart(2, '0')}.png`);
+        }
+        showToast(`已依序下載 ${total} 張 IG 圖 + ${total} 張區塊圖`,'ok');
+      }finally{
+        wrap.classList.remove('capture-pad');
+        document.body.classList.remove('capturing');
+      }
+    }
+
+    /* ===== 下載到資料夾（每區另存） ===== */
+    async function downloadJPGToFolder(){
+      const groups = getSectionGroups();
+      const total = groups.length;
+      if (!total){ showToast('沒有可下載的分區內容','err'); return; }
+
+      const hasFSP = 'showSaveFilePicker' in window;
+      document.body.classList.add('capturing');
+      wrap.classList.add('capture-pad');
+
+      try{
+        for (let i = 0; i < total; i++){
+          const filesToSave = [
+            { blob: await renderIGSectionToBlob(groups[i]), name: `更多精選商品_IG圖_${String(i + 1).padStart(2, '0')}.png` },
+            { blob: await renderBlockSectionToBlob(groups[i]), name: `更多精選商品_區塊圖_${String(i + 1).padStart(2, '0')}.png` }
+          ];
+
+          for (const file of filesToSave){
+            if (hasFSP){
+              try{
+                const handle = await window.showSaveFilePicker({
+                  suggestedName: file.name,
+                  types: [{ description:'PNG Image', accept:{ 'image/png':['.png'] } }]
+                });
+                const writable = await handle.createWritable();
+                await writable.write(file.blob);
+                await writable.close();
+              }catch(e){
+                if(e?.name==='AbortError'){
+                  showToast('已取消儲存','load',1600);
+                  return;
+                }else{
+                  await downloadBlob(file.blob, file.name);
+                }
               }
+            }else{
+              await downloadBlob(file.blob, file.name);
             }
-          }else{
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.download = suggestedName; a.href = url; a.click();
-            URL.revokeObjectURL(url);
           }
         }
-        showToast('已完成儲存/下載','ok');
+        showToast(`已完成依序儲存/下載 ${total} 張 IG 圖 + ${total} 張區塊圖`,'ok');
       }catch(err){
         console.error(err);
-        showToast('發生錯誤，改用預設下載','load',1600);
+        showToast('發生錯誤，改用預設分區下載','load',1600);
         await captureJPGByPages();
       }finally{
         wrap.classList.remove('capture-pad');
@@ -602,18 +1230,12 @@
       try{
         const buf = await file.arrayBuffer();
         const wb = XLSX.read(buf, { type: 'array' });
-
-        const exact = wb.SheetNames.find(n => n.trim() === PAGE_NAME);
-        const loose = wb.SheetNames.find(n => n.trim().replace(/\s+/g,'').toLowerCase() === PAGE_NAME_NORM);
-        const pickedName = exact || loose || wb.SheetNames[0];
-
+        const pickedName = wb.SheetNames[0];
         const ws = wb.Sheets[pickedName];
-        const arr = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-        state.rowsByIndex = rowsFromGridPattern(arr);
+        state.rowsByIndex = parseFeaturedSections(ws);
 
         const countFromSheet  = state.rowsByIndex.length;
 
-        // 若已載入 JSON 編輯檔，工單匯入「只更新文字」，不縮減格數以免誤刪/覆蓋已編輯圖片
         if (!lockEditedImages){
           if (countFromSheet !== slotCount){
             slotCount = countFromSheet;
@@ -621,7 +1243,6 @@
             adjustGridSize(slotCount);
           }
         }else{
-          // 只允許增加格數（新增格會是空圖），不允許縮減格數
           if (countFromSheet > slotCount){
             slotCount = countFromSheet;
             document.getElementById('slotCount').value = slotCount;
@@ -629,9 +1250,12 @@
           }
         }
         applyRowsToDOM();
-        showToast(`本機工單載入成功（使用頁籤：${pickedName}）`,'ok');
+        showToast(`本機工單載入成功（使用頁籤：${pickedName}，共 ${countFromSheet} 格）`,'ok');
         saveAutoDebounced();
-      }catch(e){ showToast('本機工單載入失敗','err'); }
+      }catch(e){
+        console.error(e);
+        showToast(`本機工單載入失敗：${e?.message || '格式不符'}`,'err', 2600);
+      }
     }
 
     function parseGSheetUrl(u){
@@ -656,12 +1280,9 @@
         const text = await res.text();
         const wb = XLSX.read(text, { type: 'string' });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const arr = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-        state.rowsByIndex = rowsFromGridPattern(arr);
+        state.rowsByIndex = parseFeaturedSections(ws);
 
         const countFromSheet  = state.rowsByIndex.length;
-
-        // 若已載入 JSON 編輯檔，工單匯入「只更新文字」，不縮減格數以免誤刪/覆蓋已編輯圖片
         if (!lockEditedImages){
           if (countFromSheet !== slotCount){
             slotCount = countFromSheet;
@@ -669,7 +1290,6 @@
             adjustGridSize(slotCount);
           }
         }else{
-          // 只允許增加格數（新增格會是空圖），不允許縮減格數
           if (countFromSheet > slotCount){
             slotCount = countFromSheet;
             document.getElementById('slotCount').value = slotCount;
@@ -678,49 +1298,72 @@
         }
         applyRowsToDOM();
         loading.remove();
-        showToast(`雲端工單載入成功（請確認分頁 =「${PAGE_NAME}」）`,'ok');
+        showToast(`雲端工單載入成功（共 ${countFromSheet} 格）`,'ok');
         saveAutoDebounced();
       }catch(e){
         loading.remove();
-        showToast('雲端工單載入失敗（請確認權限或改用發佈為 CSV）','err');
+        console.error(e);
+        showToast('雲端工單載入失敗：新版規則需要保留合併欄位資訊，請優先使用 .xlsx','err', 3200);
       }
     }
 
     /* ===== 圖片載入規則 ===== */
+    function extractSequenceNumber(name){
+      const base = fileBaseName(name);
+      // 檔名不限前後文字，只抓其中的數字編號：
+      // 例如 產品1 / 圖片2 / A_001 / 商品002_final 都會抓到 1 / 2 / 1 / 2
+      const nums = base.match(/\d+/g);
+      if(!nums || !nums.length) return null;
+      // 預設取第一段數字作為流水號，前導 0 會自動正規化：001 -> 1
+      return Number(nums[0]);
+    }
+
+    function isImageFile(file){
+      const name = (file?.name || '').toLowerCase();
+      const type = (file?.type || '').toLowerCase();
+      return (
+        type.startsWith('image/') ||
+        /\.(jpg|jpeg|png|webp)$/i.test(name)
+      );
+    }
+
     async function handleFolderFiles(fileList){
-      const files = [...fileList].filter(f=> f.type.startsWith('image/'));
+      const files = [...fileList].filter(f=> isImageFile(f));
       if (!files.length){
         showToast('沒有可用的圖片','err');
         return;
       }
 
-      const nameToUrl = new Map();
-      const duplicateNames = new Set();
+      const seqToUrl = new Map();
+      const duplicateSeq = new Set();
       for (const f of files){
-        const key = fileBaseName(f.name);
-        const url = URL.createObjectURL(f);
-        if (nameToUrl.has(key)){
-          duplicateNames.add(key);
+        const seq = extractSequenceNumber(f.name);
+        if(seq == null) continue;
+        const url = await fileToDataURL(f);
+        if (seqToUrl.has(seq)){
+          duplicateSeq.add(seq);
         }else{
-          nameToUrl.set(key, url);
+          seqToUrl.set(seq, url);
         }
       }
 
       let hit = 0;
       const misses = [];
 
-      [...grid.children].forEach((card,i)=>{
-        const row = state.rowsByIndex[i] || { item:'', imgKey:'', copy:'' };
-        const expectedFileBase = row.imgKey.trim();
+      getCards().forEach((card,i)=>{
+        const row = state.rowsByIndex[i] || { item:'', copy:'', seq:null };
         const img = card.querySelector('img');
         const ph  = card.querySelector('.ph');
+        const seq = row.seq;
 
-        if (expectedFileBase && nameToUrl.has(expectedFileBase)){
-          // 若已載入 JSON 編輯檔：只填「空的圖片格」，不要覆蓋已存在（可能已裁切/編輯）的圖片
+        if (seq != null && seqToUrl.has(seq)){
           const hasImg = !!img.getAttribute('src');
           if (!lockEditedImages || !hasImg){
-            img.src = nameToUrl.get(expectedFileBase);
+            img.src = seqToUrl.get(seq);
+            applyDefaultImageFit(img);
             ph.style.display = 'none';
+            resetImageTransform(card);
+            applyImageTransform(card);
             hit++;
           }
         }else{
@@ -728,23 +1371,44 @@
             img.removeAttribute('src');
             ph.style.display = 'flex';
           }
-          misses.push(expectedFileBase || `#${i+1}`);
+          misses.push(seq != null ? `流水號${seq}` : `#${i+1}`);
         }
       });
 
-      showToast(`已匹配 ${hit} 張（依主標下方檔名）`,'ok');
-      if (duplicateNames.size){
-        showToast(`偵測到重複檔名（只採第一個）：${[...duplicateNames].slice(0,5).join('、')}${duplicateNames.size>5?'…':''}`,'load',2600);
+      showToast(`已匹配 ${hit} 張（只看檔名中的數字編號）`,'ok');
+      if (duplicateSeq.size){
+        showToast(`偵測到重複流水號（只採第一個）：${[...duplicateSeq].slice(0,6).join('、')}${duplicateSeq.size>6?'…':''}`,'load',5000);
       }
       if (misses.length){
-        showToast(`未找到對應圖片：${misses.slice(0,6).join('、')}${misses.length>6?'…':''}`,'load',2600);
+        showToast(`未找到對應圖片：${misses.slice(0,6).join('、')}${misses.length>6?'…':''}`,'load',5000);
       }
 
       saveAutoDebounced();
     }
 
 
-    /* ===== 自動載入（同層） ===== */
+    
+    async function findBottomImageInRoot(root){
+      try{
+        for await (const [name, handle] of root.entries()){
+          if(handle.kind === 'directory' && name === '#勿動資料夾'){
+            for await (const [subName, subHandle] of handle.entries()){
+              if(subHandle.kind === 'file' && subName === '吸底.png'){
+                const f = await subHandle.getFile();
+                state.bottomImageDataUrl = await fileToDataURL(f);
+                renderSectionsLayout();
+                return true;
+              }
+            }
+          }
+        }
+      }catch(err){
+        console.error(err);
+      }
+      return false;
+    }
+
+/* ===== 自動載入（同層） ===== */
     async function autoLoad(){
       if(!('showDirectoryPicker' in window)){ showToast('瀏覽器不支援同層自動讀取','err'); return; }
       try{
@@ -770,24 +1434,23 @@
           showToast('未找到工單檔（.xlsx/.csv）','load',1600);
         }
 
-        let imgFolder = null;
-        for await (const [name, handle] of root.entries()){
-          if(handle.kind==='directory'){
-            const norm = name.replace(/\s+/g,'').toLowerCase();
-            if(norm === PAGE_NAME_NORM){ imgFolder = handle; break; }
+        const imgs = [];
+        for await (const [, handle] of root.entries()){
+          if(handle.kind==='file'){
+            const f = await handle.getFile();
+            if(isImageFile(f)) imgs.push(f);
           }
         }
-        if(!imgFolder){
-          showToast(`找不到同名資料夾「${PAGE_NAME}」`,'err');
+
+        if(!imgs.length){
+          showToast('未找到圖片（與工單同層，支援 JPG / PNG / WEBP）','err');
         }else{
-          const imgs = [];
-          for await (const [, h] of imgFolder.entries()){
-            if(h.kind==='file'){
-              const f = await h.getFile();
-              if(f.type.startsWith('image/')) imgs.push(f);
-            }
-          }
           await handleFolderFiles(imgs);
+        }
+
+        const bottomOk = await findBottomImageInRoot(root);
+        if(!bottomOk){
+          showToast('未找到吸底圖：可改用上方「上傳吸底圖」手動指定','load',5000);
         }
 
         showToast('自動載入完成','ok');
@@ -818,23 +1481,26 @@
 
     // 下載編輯檔：使用 DataURL 內嵌圖片（方案 A）
     async function saveDraft(){
-      const cards = [...grid.children];
+      await ensureAllImagesEmbedded();
+      const cards = getCards();
       const items = [];
       let idx = 0;
       for (const card of cards){
         const img = card.querySelector('img');
         const brand = card.querySelector('.brand').textContent;
-        const share = card.querySelector('.share').textContent;
+        const share = sanitizeShareText(card.querySelector('.share').textContent);
         const src = img.getAttribute('src') || '';
         const dataUrl = await imageToDataURL(src);  // 這裡確保裁切後 / 外部圖都被轉成 DataURL 存進 JSON
-        items.push({ img: dataUrl, brand, share });
+        const bgColor = getComputedStyle(card).getPropertyValue('--bg').trim() || '';
+        const imgTransform = getImageTransform(card);
+        items.push({ img: dataUrl, brand, share, bgColor, imgTransform });
 
         // 也同步更新 original，讓載入後「還原」是回到編輯檔初始狀態
-        state.original[idx] = { url: dataUrl || '', brand, share };
+        state.original[idx] = { url: dataUrl || '', brand, share, bgColor, imgTransform };
         idx++;
       }
       const blob = new Blob([JSON.stringify({
-        meta:{ slotCount, width: wrap.style.maxWidth || '1200px', imgHeight, page: PAGE_NAME, version:8 },
+        meta:{ slotCount, width: wrap.style.maxWidth || '1000px', imgHeight, fontSize: Number(getComputedStyle(document.documentElement).getPropertyValue('--font-size-main').replace('px','')) || 30, page: PAGE_NAME, version:10 },
         items
       })], {type:'application/json'});
       const a = document.createElement('a');
@@ -854,28 +1520,41 @@
           imgHeight = Number(data?.meta?.imgHeight || 280);
           document.getElementById('slotCount').value = slotCount;
           document.getElementById('imgHeight').value = imgHeight;
-          document.documentElement.style.setProperty('--img-height', imgHeight+'px');
-          wrap.style.maxWidth = data?.meta?.width || '1200px';
+          document.documentElement.style.setProperty('--card-height', imgHeight+'px');
+          const fontSize = Number(data?.meta?.fontSize || 30);
+          document.getElementById('fontSize').value = fontSize;
+          document.documentElement.style.setProperty('--font-size-main', fontSize+'px');
+          wrap.style.maxWidth = data?.meta?.width || '1000px';
 
           adjustGridSize(slotCount);
           state.original = {}; // 重建 original，對齊載入的內容
 
           (data.items||[]).forEach((it,i)=>{
-            const card = grid.children[i];
+            const card = getCardAt(i);
             if(!card) return;
             const img   = card.querySelector('img');
             const ph    = card.querySelector('.ph');
             const brand = card.querySelector('.brand');
             const share = card.querySelector('.share');
-            if(it.img){ img.src = it.img; ph.style.display='none'; } else { img.removeAttribute('src'); ph.style.display='flex'; }
+            if(it.img){
+              img.src = it.img;
+              applyDefaultImageFit(img);
+              ph.style.display='none';
+            } else { img.removeAttribute('src'); ph.style.display='flex'; }
             brand.textContent = it.brand || '';
-            share.textContent = it.share || '';
+            share.textContent = sanitizeShareText(it.share || '');
+            card.style.setProperty('--bg', it.bgColor || (state.rowsByIndex[i]?.bgColor || '#ffbd83'));
+            card._imgTransform = { ...defaultImageTransform(), ...(it.imgTransform || {}) };
+            wireThumbInteractions(card);
+            applyImageTransform(card);
 
             // 以 JSON 裡的狀態當作「還原」基準
             state.original[i] = {
               url: it.img || '',
               brand: it.brand || '',
-              share: it.share || ''
+              share: it.share || '',
+              bgColor: it.bgColor || (state.rowsByIndex[i]?.bgColor || ''),
+              imgTransform: { ...defaultImageTransform(), ...(it.imgTransform || {}) }
             };
           });
           showToast('暫存已載入（含圖片 DataURL）','ok');
@@ -891,7 +1570,7 @@
 
     function clearAll(){
       if(!confirm('確定要清除內容嗎？這會移除所有圖片與文字，並清除自動暫存。')) return;
-      [...grid.children].forEach(card=>{
+      getCards().forEach(card=>{
         const img = card.querySelector('img');
         const ph  = card.querySelector('.ph');
         const brand = card.querySelector('.brand');
@@ -935,7 +1614,7 @@
       saveAutoDebounced();
     });
     document.getElementById('widthPx').addEventListener('input', e=>{
-      const v = Math.max(600, Number(e.target.value||1200));
+      const v = Math.max(600, Number(e.target.value||1000));
       wrap.style.maxWidth = v + 'px';
       saveAutoDebounced();
     });
@@ -947,12 +1626,24 @@
       saveAutoDebounced();
     });
     document.getElementById('imgHeight').addEventListener('input', e=>{
-      imgHeight = Math.max(100, Number(e.target.value||280));
-      document.documentElement.style.setProperty('--img-height', imgHeight+'px');
+      imgHeight = Math.max(100, Number(e.target.value||244));
+      document.documentElement.style.setProperty('--card-height', imgHeight+'px');
+      saveAutoDebounced();
+    });
+    document.getElementById('fontSize').addEventListener('input', e=>{
+      const v = Math.max(1, Number(e.target.value||30));
+      document.documentElement.style.setProperty('--font-size-main', v+'px');
       saveAutoDebounced();
     });
 
-    document.getElementById('downloadJPG').addEventListener('click', captureJPGByPages);
+    document.getElementById('downloadJPG').addEventListener('click', async ()=>{
+      try{
+        await captureJPGByPages();
+      }catch(err){
+        console.error(err);
+        showToast('下載 JPG 失敗：' + (err?.message || '未知錯誤'), 'err', 5000);
+      }
+    });
     document.getElementById('downloadToFolder').addEventListener('click', downloadJPGToFolder);
 
     document.getElementById('saveDraft').addEventListener('click', saveDraft);
@@ -967,15 +1658,16 @@
     window.addEventListener('drop', e=>{
       e.preventDefault();
       const files = [...e.dataTransfer.files];
-      const imgs = files.filter(f=> f.type.startsWith('image/'));
+      const imgs = files.filter(f=> isImageFile(f));
       const sheet = files.find(f=> /\.(xlsx|xls|csv)$/i.test(f.name));
       if(sheet) handleSheetFile(sheet);
       if(imgs.length) handleFolderFiles(imgs);
     });
 
-    wrap.style.maxWidth = '1200px';
+    wrap.style.maxWidth = '1000px';
     adjustGridSize(slotCount);
-    document.documentElement.style.setProperty('--img-height', imgHeight+'px');
+    document.documentElement.style.setProperty('--card-height', imgHeight+'px');
+    document.getElementById('fontSize').value = Number(getComputedStyle(document.documentElement).getPropertyValue('--font-size-main').replace('px','')) || 30;
     loadAuto();
     setEditModeUI();
   </script>
