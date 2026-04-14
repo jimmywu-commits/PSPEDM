@@ -10,20 +10,20 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 
 <style>
-  /* 本機同層字型：./#勿動資料夾/字體/ShopeeNotoSans(content)-*.ttf */
+  /* 本機同層字型：./fonts/ShopeeNotoSans(content)-*.ttf */
   @font-face{
     font-family:"SN-Bold";
-    src:url("./%23勿動資料夾/字體/ShopeeNotoSans(content)-Bold.ttf") format("truetype");
+    src:url("./fonts/ShopeeNotoSans(content)-Bold.ttf") format("truetype");
     font-weight:700;font-style:normal;font-display:swap;
   }
   @font-face{
     font-family:"SN-Medium";
-    src:url("./%23勿動資料夾/字體/ShopeeNotoSans(content)-Medium.ttf") format("truetype");
+    src:url("./fonts/ShopeeNotoSans(content)-Medium.ttf") format("truetype");
     font-weight:500;font-style:normal;font-display:swap;
   }
   @font-face{
     font-family:"SN-Regular";
-    src:url("./%23勿動資料夾/字體/ShopeeNotoSans(content)-Regular.ttf") format("truetype");
+    src:url("./fonts/ShopeeNotoSans(content)-Regular.ttf") format("truetype");
     font-weight:400;font-style:normal;font-display:swap;
   }
 
@@ -399,7 +399,7 @@
 
       if (!(hasBold && hasMedium && hasRegular)){
         showToast(
-          '⚠️ ShopeeNotoSans 字型未成功載入，請確認同層「#勿動資料夾/字體」內 SN-Bold / SN-Medium / SN-Regular 是否存在，且路徑與檔名正確。',
+          '⚠️ ShopeeNotoSans 字型未成功載入，請確認同層「fonts」內 SN-Bold / SN-Medium / SN-Regular 是否存在，且路徑與檔名正確。',
           'err',
           6000
         );
@@ -846,272 +846,59 @@
     }
 
 
-    function buildExportCard(card){
-      const cardClone = card.cloneNode(true);
-      cardClone.style.width = '377px';
-      cardClone.style.background = 'transparent';
-      cardClone.style.padding = '0';
-      const thumb = cardClone.querySelector('.thumb');
-      if(thumb){
-        thumb.style.width = '377px';
-        thumb.style.height = '244px';
-        thumb.style.minHeight = '244px';
-        thumb.style.background = '#fff';
-        thumb.style.display = 'flex';
-        thumb.style.alignItems = 'center';
-        thumb.style.justifyContent = 'center';
-        thumb.style.overflow = 'hidden';
-      }
-      const img = cardClone.querySelector('img');
-      if(img){
-        img.style.maxWidth = 'none';
-        img.style.maxHeight = 'none';
-        img.style.width = 'auto';
-        img.style.height = 'auto';
-        img.style.objectFit = 'contain';
-        img.style.display = 'block';
-        img.style.margin = '0';
-      }
-      const cloneWrap = cardClone.querySelector('.img-transform');
-      const sourceWrap = card.querySelector('.img-transform');
-      if(cloneWrap && sourceWrap){
-        cloneWrap.style.transform = sourceWrap.style.transform || 'translate(-50%, -50%) scale(1)';
-      }
-      const brand = cardClone.querySelector('.brand');
-      const share = cardClone.querySelector('.share');
-      if(brand) brand.style.fontSize = '30px';
-      if(share) share.style.fontSize = '30px';
-      const meta = cardClone.querySelector('.meta');
-      if(meta) meta.style.padding = '21px 0 0';
-      cardClone.querySelectorAll('.toolbar').forEach(el=>el.remove());
-      cardClone.querySelectorAll('.picker').forEach(el=>el.remove());
-      cardClone.querySelectorAll('.img-hint').forEach(el=>el.remove());
-      return cardClone;
+    function prepareExportNode(node){
+      const clone = node.cloneNode(true);
+      clone.querySelectorAll('.toolbar').forEach(el=>el.remove());
+      clone.querySelectorAll('.picker').forEach(el=>el.remove());
+      clone.querySelectorAll('.img-hint').forEach(el=>el.remove());
+      clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+      return clone;
+    }
+
+    async function renderNodeToBlob(node, backgroundColor){
+      const exportWrap = document.createElement('div');
+      exportWrap.style.position = 'fixed';
+      exportWrap.style.left = '-99999px';
+      exportWrap.style.top = '0';
+      exportWrap.style.margin = '0';
+      exportWrap.style.padding = '0';
+      exportWrap.style.background = backgroundColor || '#fff';
+      exportWrap.style.boxSizing = 'border-box';
+
+      const clone = prepareExportNode(node);
+      exportWrap.appendChild(clone);
+      document.body.appendChild(exportWrap);
+
+      await new Promise(resolve => requestAnimationFrame(() => resolve()));
+      await new Promise(resolve => requestAnimationFrame(() => resolve()));
+
+      const rect = clone.getBoundingClientRect();
+      const canvas = await html2canvas(clone, {
+        useCORS:false,
+        allowTaint:false,
+        backgroundColor: backgroundColor || '#fff',
+        scale:2,
+        width: Math.ceil(rect.width),
+        height: Math.ceil(rect.height),
+        windowWidth: Math.ceil(rect.width),
+        windowHeight: Math.ceil(rect.height)
+      });
+      exportWrap.remove();
+      return canvasToBlob(canvas, backgroundColor || '#fff');
     }
 
     async function renderIGSectionToBlob(group){
-      const exportWidth = 1000;
-      const exportHeight = 1000;
-      const contentWidth = 846;
-      const sourceWidth = 1200;
-      const scaleRatio = contentWidth / sourceWidth;
-
-      const igCards = (group.cards || []).slice(0, 9);
-
-      const exportWrap = document.createElement('div');
-      exportWrap.style.position = 'fixed';
-      exportWrap.style.left = '-99999px';
-      exportWrap.style.top = '0';
-      exportWrap.style.width = exportWidth + 'px';
-      exportWrap.style.height = exportHeight + 'px';
-      exportWrap.style.background = '#f8e8d9';
-      exportWrap.style.overflow = 'hidden';
-      exportWrap.style.boxSizing = 'border-box';
-
-      const pageEl = document.createElement('section');
-      pageEl.className = 'ig-page';
-      pageEl.style.width = exportWidth + 'px';
-      pageEl.style.height = exportHeight + 'px';
-      pageEl.style.background = '#f8e8d9';
-      pageEl.style.margin = '0 auto';
-      pageEl.style.boxSizing = 'border-box';
-      pageEl.style.position = 'relative';
-      pageEl.style.overflow = 'hidden';
-
-      const titleWrap = document.createElement('div');
-      titleWrap.className = 'ig-title-wrap';
-      titleWrap.style.position = 'absolute';
-      titleWrap.style.left = '0';
-      titleWrap.style.top = '65px';
-      titleWrap.style.width = '100%';
-      titleWrap.style.display = 'flex';
-      titleWrap.style.justifyContent = 'center';
-      titleWrap.style.margin = '0';
-      titleWrap.style.padding = '0';
-
-      const titleEl = document.createElement('div');
-      titleEl.className = 'ig-title';
-      titleEl.textContent = group.sectionTitle || PAGE_NAME;
-      titleEl.style.fontSize = '48px';
-      titleEl.style.fontWeight = '700';
-      titleEl.style.lineHeight = '1';
-      titleEl.style.color = '#fff';
-      titleEl.style.background = '#ee4d2d';
-      titleEl.style.borderRadius = '9999px';
-      titleEl.style.height = '66px';
-      titleEl.style.minHeight = '66px';
-      titleEl.style.padding = '0 28px';
-      titleEl.style.margin = '0';
-      titleEl.style.display = 'inline-flex';
-      titleEl.style.alignItems = 'center';
-      titleEl.style.justifyContent = 'center';
-      titleEl.style.boxSizing = 'border-box';
-      titleWrap.appendChild(titleEl);
-
-      const titleBottom = 65 + 66;
-      const blockTop = titleBottom + 38;
-
-      const scaledOuter = document.createElement('div');
-      scaledOuter.style.width = contentWidth + 'px';
-      scaledOuter.style.position = 'absolute';
-      scaledOuter.style.left = ((exportWidth - contentWidth) / 2) + 'px';
-      scaledOuter.style.top = blockTop + 'px';
-      scaledOuter.style.margin = '0';
-      scaledOuter.style.padding = '0';
-      scaledOuter.style.display = 'block';
-      scaledOuter.style.height = 'auto';
-      scaledOuter.style.overflow = 'visible';
-
-      const scaledStage = document.createElement('div');
-      scaledStage.style.width = sourceWidth + 'px';
-      scaledStage.style.transform = 'scale(' + scaleRatio + ')';
-      scaledStage.style.transformOrigin = 'top left';
-      scaledStage.style.display = 'inline-block';
-
-      const sectionEl = document.createElement('div');
-      sectionEl.className = 'section-block';
-      sectionEl.style.width = sourceWidth + 'px';
-      sectionEl.style.margin = '0';
-      sectionEl.style.background = group.bgColor || '#fff';
-      sectionEl.style.padding = '17px';
-      sectionEl.style.boxSizing = 'border-box';
-
-      const sectionGrid = document.createElement('div');
-      sectionGrid.className = 'section-grid';
-      sectionGrid.style.display = 'grid';
-      sectionGrid.style.gridTemplateColumns = 'repeat(3,377px)';
-      sectionGrid.style.columnGap = '17px';
-      sectionGrid.style.rowGap = '17px';
-      sectionGrid.style.justifyContent = 'start';
-
-      igCards.forEach((card) => {
-        sectionGrid.appendChild(buildExportCard(card));
-      });
-
-      sectionEl.appendChild(sectionGrid);
-      scaledStage.appendChild(sectionEl);
-      scaledOuter.appendChild(scaledStage);
-
-      const rowCount = Math.max(1, Math.ceil(igCards.length / 3));
-      const thumbHeight = 244;
-      const metaHeight = 55;
-      const rowGap = 17;
-      const blockPadTop = 17;
-      const blockPadBottom = 17;
-      const sourceHeight = blockPadTop + blockPadBottom + (rowCount * (thumbHeight + metaHeight)) + (Math.max(0, rowCount - 1) * rowGap);
-      const scaledBlockHeight = Math.ceil(sourceHeight * scaleRatio);
-      scaledOuter.style.height = scaledBlockHeight + 'px';
-
-      const footer = document.createElement('div');
-      footer.className = 'ig-footer';
-      footer.style.position = 'absolute';
-      footer.style.left = '0';
-      footer.style.top = (blockTop + scaledBlockHeight + 15) + 'px';
-      footer.style.width = exportWidth + 'px';
-      footer.style.margin = '0';
-      footer.style.padding = '0';
-      footer.style.display = 'flex';
-      footer.style.justifyContent = 'center';
-
-      if(state.bottomImageDataUrl){
-        const footerImg = document.createElement('img');
-        footerImg.src = state.bottomImageDataUrl;
-        footerImg.alt = '吸底圖';
-        footerImg.style.display = 'block';
-        footerImg.style.width = exportWidth + 'px';
-        footerImg.style.maxWidth = exportWidth + 'px';
-        footerImg.style.height = 'auto';
-        footer.style.height = 'auto';
-        footer.appendChild(footerImg);
-      }
-
-      pageEl.appendChild(titleWrap);
-      pageEl.appendChild(scaledOuter);
-      pageEl.appendChild(footer);
-
-      exportWrap.appendChild(pageEl);
-      document.body.appendChild(exportWrap);
-
-      await new Promise(resolve => requestAnimationFrame(() => resolve()));
-      await new Promise(resolve => requestAnimationFrame(() => resolve()));
-
-      const canvas = await html2canvas(pageEl, {
-        useCORS:false,
-        allowTaint:false,
-        backgroundColor:'#f8e8d9',
-        scale:2,
-        width: exportWidth,
-        height: exportHeight
-      });
-      exportWrap.remove();
-      return canvasToBlob(canvas, '#f8e8d9');
+      const pageEl = document.querySelector(`.ig-page[data-section-index="${group.sectionIndex}"]`);
+      if(!pageEl) throw new Error('找不到 IG 區塊節點');
+      return renderNodeToBlob(pageEl, '#f8e8d9');
     }
 
     async function renderBlockSectionToBlob(group){
-      const exportWidth = 1200;
-      const exportWrap = document.createElement('div');
-      exportWrap.style.position = 'fixed';
-      exportWrap.style.left = '-99999px';
-      exportWrap.style.top = '0';
-      exportWrap.style.width = exportWidth + 'px';
-      exportWrap.style.background = group.bgColor || '#fff';
-
-      const sectionEl = document.createElement('section');
-      sectionEl.style.width = exportWidth + 'px';
-      sectionEl.style.background = group.bgColor || '#fff';
-      sectionEl.style.padding = '17px';
-
-      const sectionGrid = document.createElement('div');
-      sectionGrid.style.display = 'grid';
-      sectionGrid.style.gridTemplateColumns = 'repeat(3,377px)';
-      sectionGrid.style.columnGap = '17px';
-      sectionGrid.style.rowGap = '17px';
-
-      group.cards.forEach((card) => {
-        const cardClone = card.cloneNode(true);
-        cardClone.style.width = '377px';
-        cardClone.style.background = 'transparent';
-
-        const thumb = cardClone.querySelector('.thumb');
-        if(thumb){
-          thumb.style.width = '377px';
-          thumb.style.height = '244px';
-          thumb.style.minHeight = '244px';
-          thumb.style.background = '#fff';
-        }
-
-        const img = cardClone.querySelector('img');
-        if(img){
-          img.style.maxWidth = '100%';
-          img.style.maxHeight = '100%';
-          img.style.width = 'auto';
-          img.style.height = 'auto';
-          img.style.objectFit = 'contain';
-          img.style.display = 'block';
-          img.style.margin = 'auto';
-        }
-
-        const brand = cardClone.querySelector('.brand');
-        const share = cardClone.querySelector('.share');
-        if(brand) brand.style.fontSize = '30px';
-        if(share) share.style.fontSize = '30px';
-
-        const meta = cardClone.querySelector('.meta');
-        if(meta) meta.style.padding = '21px 0 0';
-
-        const toolbar = cardClone.querySelector('.toolbar');
-        if(toolbar) toolbar.remove();
-
-        sectionGrid.appendChild(cardClone);
-      });
-
-      sectionEl.appendChild(sectionGrid);
-      exportWrap.appendChild(sectionEl);
-      document.body.appendChild(exportWrap);
-
-      const canvas = await html2canvas(sectionEl, { useCORS:false, allowTaint:false, backgroundColor: group.bgColor || '#fff', scale:2 });
-      exportWrap.remove();
-      return canvasToBlob(canvas, group.bgColor || '#fff');
+      const pageEl = document.querySelector(`.ig-page[data-section-index="${group.sectionIndex}"]`);
+      const sectionEl = pageEl?.querySelector('.section-block');
+      if(!sectionEl) throw new Error('找不到區塊節點');
+      const bg = getComputedStyle(sectionEl).getPropertyValue('--section-bg').trim() || group.bgColor || '#fff';
+      return renderNodeToBlob(sectionEl, bg);
     }
 
     async function downloadBlob(blob, fileName){
@@ -1391,13 +1178,17 @@
     async function findBottomImageInRoot(root){
       try{
         for await (const [name, handle] of root.entries()){
-          if(handle.kind === 'directory' && name === '#勿動資料夾'){
+          if(handle.kind === 'directory' && name === 'assets'){
             for await (const [subName, subHandle] of handle.entries()){
-              if(subHandle.kind === 'file' && subName === '吸底.png'){
-                const f = await subHandle.getFile();
-                state.bottomImageDataUrl = await fileToDataURL(f);
-                renderSectionsLayout();
-                return true;
+              if(subHandle.kind === 'directory' && subName === 'images'){
+                for await (const [imgName, imgHandle] of subHandle.entries()){
+                  if(imgHandle.kind === 'file' && imgName === '吸底.png'){
+                    const f = await imgHandle.getFile();
+                    state.bottomImageDataUrl = await fileToDataURL(f);
+                    renderSectionsLayout();
+                    return true;
+                  }
+                }
               }
             }
           }
@@ -1450,7 +1241,7 @@
 
         const bottomOk = await findBottomImageInRoot(root);
         if(!bottomOk){
-          showToast('未找到吸底圖：可改用上方「上傳吸底圖」手動指定','load',5000);
+          showToast('未找到吸底圖：請確認檔案位於 ./assets/images/吸底.png','load',5000);
         }
 
         showToast('自動載入完成','ok');
