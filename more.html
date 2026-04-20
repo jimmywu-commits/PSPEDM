@@ -887,10 +887,22 @@
       return canvasToBlob(canvas, backgroundColor || '#fff');
     }
 
-    async function renderIGSectionToBlob(group){
+    function buildIGExportNode(group){
       const pageEl = document.querySelector(`.ig-page[data-section-index="${group.sectionIndex}"]`);
       if(!pageEl) throw new Error('找不到 IG 區塊節點');
-      return renderNodeToBlob(pageEl, '#f8e8d9');
+
+      const clone = pageEl.cloneNode(true);
+      const sectionGrid = clone.querySelector('.section-grid');
+      if(sectionGrid){
+        const cards = [...sectionGrid.querySelectorAll('.card')];
+        cards.slice(9).forEach(card => card.remove()); // IG 版固定只顯示三層（3 列 x 3 欄）
+      }
+      return clone;
+    }
+
+    async function renderIGSectionToBlob(group){
+      const igNode = buildIGExportNode(group);
+      return renderNodeToBlob(igNode, '#f8e8d9');
     }
 
     async function renderBlockSectionToBlob(group){
