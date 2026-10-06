@@ -173,8 +173,11 @@
       </label>
     
 
-      <button id="downloadToFolder" class="btn">下載到資料夾</button> 
-		  <button id="autoLoad" class="btn">上傳工單</button>
+      <button id="downloadToFolder" class="btn">下載到資料夾</button>
+		  <label class="btn" style="cursor:pointer">
+		    上傳工單
+		    <input id="autoLoadFiles" type="file" multiple accept=".xlsx,.xls,.csv,image/*,.webp" style="display:none" />
+		  </label>
 
       <button id="saveDraft" class="btn secondary">下載編輯檔</button>
       <label class="btn secondary">
@@ -513,12 +516,21 @@
       return map;
     }
 
-    function findAnchorCell(arr, keyword){
+    function findAnchorCell(arr, keywords){
+      const list = Array.isArray(keywords) ? keywords : [keywords];
+      const normalize = s => s.replace(/[\s【】\[\]()（）：:]/g,'').toLowerCase();
+      const normList = list.map(normalize);
       for(let r=0; r<arr.length; r++){
         const row = arr[r] || [];
         for(let c=0; c<row.length; c++){
-          const text = (row[c] ?? '').toString().trim();
-          if(text === keyword) return { r, c };
+          const raw = (row[c] ?? '').toString().trim();
+          if(!raw) continue;
+          const norm = normalize(raw);
+          for(let i=0; i<list.length; i++){
+            if(raw === list[i] || norm === normList[i]){
+              return { r, c, matched: list[i] };
+            }
+          }
         }
       }
       return null;
@@ -526,10 +538,12 @@
 
     function parseFeaturedSections(ws){
       const arr = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-      const anchor = findAnchorCell(arr, PAGE_NAME);
+      // 錨點只認頁名「更多精選商品」，以上的資料一律忽略
+      const anchor = findAnchorCell(arr, [PAGE_NAME]);
       if(!anchor) throw new Error(`找不到「${PAGE_NAME}」座標`);
 
       const merges = getMergedRangeMap(ws);
+      const skipTexts = new Set([PAGE_NAME]);
       const sections = [];
       for(let r = anchor.r + 1; r < arr.length; r++){
         const row = arr[r] || [];
@@ -540,7 +554,7 @@
           if(!merge) continue;
           const isHorizontal = merge.s.r === r && merge.s.c === c && merge.e.c > merge.s.c;
           if(!isHorizontal) continue;
-          if(text === PAGE_NAME) continue;
+          if(skipTexts.has(text)) continue;
           sections.push({
             title: text,
             startRow: r,
@@ -789,43 +803,24 @@
     function getSectionGroups(){
       const cards = getCards();
       const groups = [];
-      const sections = state.sections?.length ? state.sections : [];
+      const sections = state.sections?.length
+        ? state.sections
+        : [{ sectionIndex: 0, sectionTitle: PAGE_NAME, bgColor: SECTION_BG_COLORS[0], startItemIndex: 0, itemCount: cards.length }];
 
-      if(sections.length){
-        sections.forEach((section, idx) => {
-          const sectionCards = cards.slice(section.startItemIndex, section.startItemIndex + section.itemCount);
-          if(sectionCards.length){
-            groups.push({
-              sectionIndex: section.sectionIndex ?? idx,
-              sectionNumber: idx + 1,
-              sectionTitle: section.sectionTitle || PAGE_NAME,
-              bgColor: section.bgColor || SECTION_BG_COLORS[idx % SECTION_BG_COLORS.length],
-              cards: sectionCards,
-              rowCount: section.rowCount || Math.ceil(sectionCards.length / 3),
-            });
-          }
-        });
-        return groups;
-      }
-
-      let current = null;
-      cards.forEach((card, idx) => {
-        const row = state.rowsByIndex[idx] || {};
-        if(!current || current.sectionIndex !== row.sectionIndex){
-          current = {
-            sectionIndex: row.sectionIndex,
-            sectionNumber: groups.length + 1,
-            sectionTitle: row.sectionTitle || PAGE_NAME,
-            bgColor: row.bgColor || SECTION_BG_COLORS[groups.length % SECTION_BG_COLORS.length],
-            cards: [],
-            rowCount: 0,
-          };
-          groups.push(current);
+      sections.forEach((section, idx) => {
+        const sectionCards = cards.slice(section.startItemIndex, section.startItemIndex + section.itemCount);
+        if(sectionCards.length){
+          groups.push({
+            sectionIndex: section.sectionIndex ?? idx,
+            sectionNumber: idx + 1,
+            sectionTitle: section.sectionTitle || PAGE_NAME,
+            bgColor: section.bgColor || SECTION_BG_COLORS[idx % SECTION_BG_COLORS.length],
+            cards: sectionCards,
+            rowCount: section.rowCount || Math.ceil(sectionCards.length / 3),
+          });
         }
-        current.cards.push(card);
       });
-      groups.forEach(g => { g.rowCount = Math.ceil(g.cards.length / 3); });
-      return groups.filter(g => g.cards.length);
+      return groups;
     }
 
     async function canvasToBlobSafe(canvas){
@@ -1106,17 +1101,7 @@
       }
     }
 
-    /* ===== 圖片載入規則 ===== */
-    function extractSequenceNumber(name){
-      const base = fileBaseName(name);
-      // 檔名不限前後文字，只抓其中的數字編號：
-      // 例如 產品1 / 圖片2 / A_001 / 商品002_final 都會抓到 1 / 2 / 1 / 2
-      const nums = base.match(/\d+/g);
-      if(!nums || !nums.length) return null;
-      // 預設取第一段數字作為流水號，前導 0 會自動正規化：001 -> 1
-      return Number(nums[0]);
-    }
-
+    /* ===== 圖片載入規則：優先品牌名，退路看流水號 ===== */
     function isImageFile(file){
       const name = (file?.name || '').toLowerCase();
       const type = (file?.type || '').toLowerCase();
@@ -1126,6 +1111,14 @@
       );
     }
 
+    // 從檔名抽第一段數字作為流水號（001 → 1）
+    function extractSequenceNumber(name){
+      const base = fileBaseName(name);
+      const nums = base.match(/\d+/g);
+      if(!nums || !nums.length) return null;
+      return Number(nums[0]);
+    }
+
     async function handleFolderFiles(fileList){
       const files = [...fileList].filter(f=> isImageFile(f));
       if (!files.length){
@@ -1133,16 +1126,16 @@
         return;
       }
 
+      // 流水號 → url
       const seqToUrl = new Map();
-      const duplicateSeq = new Set();
+      const duplicateSeqs = new Set();
       for (const f of files){
+        const stem = fileBaseName(f.name);
         const seq = extractSequenceNumber(f.name);
-        if(seq == null) continue;
         const url = await fileToDataURL(f);
-        if (seqToUrl.has(seq)){
-          duplicateSeq.add(seq);
-        }else{
-          seqToUrl.set(seq, url);
+        if(seq != null){
+          if (seqToUrl.has(seq)) duplicateSeqs.add(seq);
+          else seqToUrl.set(seq, { url, name: stem });
         }
       }
 
@@ -1153,12 +1146,16 @@
         const row = state.rowsByIndex[i] || { item:'', copy:'', seq:null };
         const img = card.querySelector('img');
         const ph  = card.querySelector('.ph');
-        const seq = row.seq;
+        const brand = row.item || '';
 
-        if (seq != null && seqToUrl.has(seq)){
+        const match = (row.seq != null && seqToUrl.has(row.seq))
+          ? seqToUrl.get(row.seq)
+          : null;
+
+        if (match){
           const hasImg = !!img.getAttribute('src');
           if (!lockEditedImages || !hasImg){
-            img.src = seqToUrl.get(seq);
+            img.src = match.url;
             applyDefaultImageFit(img);
             ph.style.display = 'none';
             resetImageTransform(card);
@@ -1170,13 +1167,13 @@
             img.removeAttribute('src');
             ph.style.display = 'flex';
           }
-          misses.push(seq != null ? `流水號${seq}` : `#${i+1}`);
+          misses.push(brand || (row.seq != null ? `流水號${row.seq}` : `#${i+1}`));
         }
       });
 
-      showToast(`已匹配 ${hit} 張（只看檔名中的數字編號）`,'ok');
-      if (duplicateSeq.size){
-        showToast(`偵測到重複流水號（只採第一個）：${[...duplicateSeq].slice(0,6).join('、')}${duplicateSeq.size>6?'…':''}`,'load',5000);
+      showToast(`已匹配 ${hit} 張（流水號）`,'ok');
+      if (duplicateSeqs.size){
+        showToast(`重複流水號（只採第一個）：${[...duplicateSeqs].slice(0,6).join('、')}${duplicateSeqs.size>6?'…':''}`,'load',5000);
       }
       if (misses.length){
         showToast(`未找到對應圖片：${misses.slice(0,6).join('、')}${misses.length>6?'…':''}`,'load',5000);
@@ -1211,55 +1208,74 @@
       return false;
     }
 
-/* ===== 自動載入（同層） ===== */
-    async function autoLoad(){
-      if(!('showDirectoryPicker' in window)){ showToast('瀏覽器不支援同層自動讀取','err'); return; }
-      try{
-        const root = await window.showDirectoryPicker();
+/* ===== 自動載入（多檔案全選） ===== */
+    function isBottomImageFile(file){
+      const name = (file?.name || '').toLowerCase();
+      return /吸底/.test(file?.name || '') || /sticky|footer|bottom/.test(name);
+    }
 
-        let sheetHandle = null;
-        const candidates = [];
-        for await (const [name, handle] of root.entries()){
-          if(handle.kind==='file' && /\.(xlsx|xls|csv)$/i.test(name)){
-            candidates.push({name, handle});
-          }
-        }
-        if(candidates.length){
-          candidates.sort((a,b)=>{
+    // 上傳新工單前，先把舊內容清空（保留本機暫存機制本身，接著會以新內容覆寫）
+    function resetWorkOrderContent(){
+      getCards().forEach(card=>{
+        const img = card.querySelector('img');
+        const ph  = card.querySelector('.ph');
+        const brand = card.querySelector('.brand');
+        const share = card.querySelector('.share');
+        if(img) img.removeAttribute('src');
+        if(ph) ph.style.display = 'flex';
+        if(brand) brand.textContent = '';
+        if(share) share.textContent = '';
+      });
+      state.images = [];
+      state.rowsByIndex = [];
+      state.original = {};
+      state.sections = [];
+      state.bottomImageDataUrl = '';
+      lockEditedImages = false;
+    }
+
+    async function handleAutoLoadFiles(fileList){
+      const files = [...fileList];
+      if(!files.length) return;
+
+      const sheets = files.filter(f => /\.(xlsx|xls|csv)$/i.test(f.name));
+      // 有工單一起上傳 → 視為「新工單」，先清空舊內容
+      if(sheets.length){
+        resetWorkOrderContent();
+      }
+      const bottomCandidates = files.filter(f => isImageFile(f) && isBottomImageFile(f));
+      const bottomFile = bottomCandidates[0] || null;
+      const imgs = files.filter(f => isImageFile(f) && f !== bottomFile);
+
+      try{
+        if(sheets.length){
+          // 若有多份工單，優先選檔名含頁名的
+          sheets.sort((a,b)=>{
             const aHit = a.name.toLowerCase().includes(PAGE_NAME_NORM) ? 0 : 1;
             const bHit = b.name.toLowerCase().includes(PAGE_NAME_NORM) ? 0 : 1;
             return aHit - bHit || a.name.localeCompare(b.name,'zh-Hant');
           });
-          sheetHandle = candidates[0].handle;
-          const f = await sheetHandle.getFile();
-          await handleSheetFile(f);
+          await handleSheetFile(sheets[0]);
         }else{
-          showToast('未找到工單檔（.xlsx/.csv）','load',1600);
+          showToast('未選到工單檔（.xlsx/.csv）','load',1600);
         }
 
-        const imgs = [];
-        for await (const [, handle] of root.entries()){
-          if(handle.kind==='file'){
-            const f = await handle.getFile();
-            if(isImageFile(f)) imgs.push(f);
-          }
-        }
-
-        if(!imgs.length){
-          showToast('未找到圖片（與工單同層，支援 JPG / PNG / WEBP）','err');
-        }else{
+        if(imgs.length){
           await handleFolderFiles(imgs);
+        }else if(!bottomFile){
+          showToast('未選到圖片（支援 JPG / PNG / WEBP）','err');
         }
 
-        const bottomOk = await findBottomImageInRoot(root);
-        if(!bottomOk){
-          showToast('未找到吸底圖：請確認檔案位於 ./assets/images/吸底.png','load',5000);
+        if(bottomFile){
+          state.bottomImageDataUrl = await fileToDataURL(bottomFile);
+          renderSectionsLayout();
         }
 
         showToast('自動載入完成','ok');
         saveAutoDebounced();
       }catch(e){
-        if(e?.name!=='AbortError') showToast('自動載入失敗','err');
+        console.error(e);
+        showToast('自動載入失敗：' + (e?.message || '未知錯誤'),'err');
       }
     }
 
@@ -1392,7 +1408,11 @@
     }
 
     /* ===== 事件綁定 ===== */
-    document.getElementById('autoLoad').addEventListener('click', autoLoad);
+    document.getElementById('autoLoadFiles').addEventListener('change', async e=>{
+      if(!e.target.files?.length) return;
+      await handleAutoLoadFiles(e.target.files);
+      e.target.value = '';
+    });
     document.getElementById('pickFolder').addEventListener('change', e=> e.target.files.length && handleFolderFiles(e.target.files));
     document.getElementById('pickSheet').addEventListener('change', e=> e.target.files[0] && handleSheetFile(e.target.files[0]));
     document.getElementById('pickReworkSheet').addEventListener('change', async e=>{
